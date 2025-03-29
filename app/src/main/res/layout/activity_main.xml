@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/background">
+    android:padding="16dp">
+<!--    android:background="@color/background">-->
 
     <!-- Header Section -->
     <RelativeLayout
@@ -19,12 +20,12 @@
             android:textSize="20sp"
             android:textStyle="bold"/>
 
-        <ImageView
-            android:id="@+id/profileIcon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/ic_profile"/>
+<!--        <ImageView-->
+<!--            android:id="@+id/profileIcon"-->
+<!--            android:layout_width="40dp"-->
+<!--            android:layout_height="40dp"-->
+<!--            android:layout_alignParentEnd="true"-->
+<!--            android:src="@drawable/ic_profile"/>-->
     </RelativeLayout>
 
     <!-- Financial Overview Cards -->
@@ -33,23 +34,23 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="2"
-        android:marginTop="16dp">
+        android:layout_marginTop="16dp">
 
-        <TextView
-            android:id="@+id/incomeCard"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:text="Income: $0.00"/>
+<!--        <TextView-->
+<!--            android:id="@+id/incomeCard"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_weight="1"-->
+<!--            android:background="@drawable/card_background"-->
+<!--            android:padding="16dp"-->
+<!--            android:text="Income: $0.00"/>-->
 
-        <TextView
-            android:id="@+id/expensesCard"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:text="Expenses: $0.00"/>
+<!--        <TextView-->
+<!--            android:id="@+id/expensesCard"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_weight="1"-->
+<!--            android:background="@drawable/card_background"-->
+<!--            android:padding="16dp"-->
+<!--            android:text="Expenses: $0.00"/>-->
     </LinearLayout>
 
     <!-- Budget Progress Bar -->
