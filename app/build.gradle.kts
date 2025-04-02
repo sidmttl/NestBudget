@@ -44,6 +44,7 @@ dependencies {
     implementation ("com.google.firebase:firebase-database:20.3.0")
     implementation ("com.google.firebase:firebase-auth:22.1.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

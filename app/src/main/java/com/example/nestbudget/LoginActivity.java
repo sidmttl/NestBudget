@@ -54,8 +54,8 @@ public class LoginActivity extends AppCompatActivity {
 
         // Handle "Create Account" link click
         textViewCreateAccount.setOnClickListener(view -> {
-//            Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
-//            startActivity(intent);
+            Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+            startActivity(intent);
         });
     }
 
