@@ -41,33 +41,42 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        setContentView(R.layout.activity_main);
+
+
+
         // Initialize Drawer Layout
         drawerLayout = findViewById(R.id.drawer_layout);
+
+        ImageView menuIcon = findViewById(R.id.menu_icon);
+
         NavigationView navigationView = findViewById(R.id.nav_view);
+
 
         // Handle Navigation Drawer Clicks
         navigationView.setNavigationItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.nav_settings:
-                    // Open Settings
-                    break;
-                case R.id.nav_logout:
-                    // Handle Logout
-                    break;
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_settings) {
+                // Open Settings
+                return true;
+            } else if (itemId == R.id.nav_logout) {
+                // Open Logout
+                return true;
             }
             drawerLayout.closeDrawers();
             return true;
+        });
+
+        menuIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navigationView.inflateMenu(0);
+            }
         });
 
         // Handle Notification and Profile Clicks
@@ -89,19 +98,20 @@ public class MainActivity extends AppCompatActivity {
         // Bottom Navigation Setup
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.menu_dashboard:
-                    // Open Dashboard
-                    return true;
-                case R.id.menu_transactions:
-                    // Open Transactions
-                    return true;
-                case R.id.menu_insights:
-                    // Open Insights
-                    return true;
-                case R.id.menu_journal:
-                    // Open Help
-                    return true;
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.menu_dashboard) {
+                // Open Dashboard
+                return true;
+            } else if (itemId == R.id.menu_transactions) {
+                // Open Transactions
+                return true;
+            } else if (itemId == R.id.menu_insights) {
+                // Open Insights
+                return true;
+            } else if (itemId == R.id.menu_journal) {
+                // Open Help
+                return true;
             }
             return false;
         });
