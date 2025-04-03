@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
@@ -11,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -127,6 +129,11 @@ public class MainActivity extends AppCompatActivity {
         dataSet.setColors(new int[]{R.color.red, R.color.blue, R.color.green, R.color.yellow, R.color.purple}, this);
 
         PieData pieData = new PieData(dataSet);
+
+        TypedValue typedValue = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
+        int colorPrimary = typedValue.data;
+        pieChart.getLegend().setTextColor(colorPrimary);
         pieChart.setData(pieData);
         pieChart.invalidate();
     }

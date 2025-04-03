@@ -9,19 +9,20 @@
     tools:context=".MainActivity">
 
     <!-- Main Content Layout -->
-    <LinearLayout
-        android:orientation="vertical"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <!-- Top Bar -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
-
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -56,63 +57,179 @@
                 android:src="@drawable/ic_profile" />
         </androidx.appcompat.widget.Toolbar>
 
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/calender_layout"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/calender_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:contentDescription="Calender"
+                android:src="@drawable/ic_calender"
+                android:visibility="visible"/>
+
+            <TextView
+                android:text="February"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_height="22dp"
+                android:layout_width="wrap_content"/>
+
+        </LinearLayout>
+
         <!-- Budget Summary Section -->
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:padding="16dp"
+            android:id="@+id/budget_summary_section"
+            app:layout_constraintTop_toBottomOf="@id/calender_layout">
 
             <TextView
-                android:text="February"
+                android:text="Budget"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_height="22dp"
-                android:layout_width="80dp"/>
+                android:layout_height="24dp"
+                android:layout_width="wrap_content"
+                android:layout_marginBottom="4dp"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="Expenses: $750 Spent"
+                    android:gravity="start"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:layout_height="22dp"
+                    android:layout_width="wrap_content"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:gravity="end"
+                    android:text="Budget: $1000"
+                    android:textColor="@android:color/holo_green_dark"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/budgetBar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="1000"
+                android:progress="700"
+                android:progressDrawable="@android:drawable/progress_horizontal"
+                android:progressTint="@color/red"
+                android:progressBackgroundTint="@color/green"
+                android:indeterminate="false"
+                android:layout_marginBottom="4dp"/>
 
             <TextView
-                android:text="Budget Left: $1000"
-                android:textSize="16sp"
+                android:text="Income"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_height="24dp"
+                android:layout_width="wrap_content"
+                android:layout_marginBottom="4dp"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="Received: $750"
+                    android:gravity="start"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/holo_green_dark"
+                    android:layout_height="22dp"
+                    android:layout_width="wrap_content"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="22dp"
+                    android:gravity="end"
+                    android:text="Expected: $1000"
+                    android:textColor="@android:color/holo_blue_dark"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+<!--            <TextView-->
+<!--                android:text="Income: $2000 Earned"-->
+<!--                android:textSize="14sp"-->
+<!--                android:layout_height="16dp"-->
+<!--                android:layout_width="80dp"/>-->
+
+            <ProgressBar
+                android:id="@+id/incomeBar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="1000"
+                android:progress="400"
+                android:progressDrawable="@android:drawable/progress_horizontal"
+                android:progressTint="@color/green"
+                android:progressBackgroundTint="@color/blue"
+                android:indeterminate="false"
+                android:layout_marginBottom="4dp"/>
+
+
+            <TextView
+                android:text="Savings Last Month: $350!"
+                android:textSize="18sp"
                 android:textColor="@android:color/holo_green_dark"
-                android:layout_height="18dp"
-                android:layout_width="80dp"/>
-
-            <TextView
-                android:text="Income: $2000 Earned"
-                android:textSize="14sp"
-                android:layout_height="16dp"
-                android:layout_width="80dp"/>
-
-            <TextView
-                android:text="Expenses: $750 Spent"
-                android:textSize="14sp"
-                android:textColor="@android:color/holo_red_dark"
-                android:layout_height="20dp"
-                android:layout_width="80dp"/>
-
-            <TextView
-                android:text="Savings: $350"
-                android:textSize="14sp"
-                android:textColor="@android:color/holo_blue_dark"
-                android:layout_height="20dp"
-                android:layout_width="80dp"/>
+                android:layout_height="24dp"
+                android:layout_width="wrap_content"
+                android:layout_marginTop="16dp"/>
         </LinearLayout>
+
+        <TextView
+            android:text="Budget Summary"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/pieChart"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginEnd="16dp"/>
 
         <!-- Pie Chart for Expense Breakdown -->
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/pieChart"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"/>
+            android:layout_width="0dp"
+            android:layout_height="300dp"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <!-- Bottom Navigation -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            app:menu="@menu/bottom_nav_menu" />
+            app:menu="@menu/bottom_nav_menu"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Navigation Drawer -->
     <com.google.android.material.navigation.NavigationView
