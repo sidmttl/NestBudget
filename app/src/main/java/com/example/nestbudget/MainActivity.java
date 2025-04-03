@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import androidx.core.view.GravityCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -72,12 +73,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        menuIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                navigationView.inflateMenu(0);
-            }
-        });
+
+        menuIcon.setOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
+
 
         // Handle Notification and Profile Clicks
         ImageView notificationIcon = findViewById(R.id.notification_icon);
