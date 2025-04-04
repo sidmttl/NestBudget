@@ -1,5 +1,6 @@
 package com.example.nestbudget;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -64,7 +65,12 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
-            if (itemId == R.id.nav_settings) {
+            if (itemId == R.id.nav_add_family) {
+                Intent intent = new Intent(MainActivity.this, JoinFamilyActivity.class);
+                startActivity(intent);
+                // Open Settings
+                return true;
+            } else if (itemId == R.id.nav_settings) {
                 // Open Settings
                 return true;
             } else if (itemId == R.id.nav_logout) {
