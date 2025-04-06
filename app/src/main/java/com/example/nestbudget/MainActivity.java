@@ -51,8 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-
-
         // Initialize Drawer Layout
         drawerLayout = findViewById(R.id.drawer_layout);
 
@@ -95,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
 
         profileIcon.setOnClickListener(v -> {
             // Open Profile Details
+            Intent intent = new Intent(MainActivity.this, SetProfileActivity.class);
+            startActivity(intent);
         });
 
         // Initialize Pie Chart
