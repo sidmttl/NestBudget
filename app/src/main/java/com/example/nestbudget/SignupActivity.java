@@ -16,6 +16,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -35,7 +36,7 @@ public class SignupActivity extends AppCompatActivity {
             return insets;
         });
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         etFirstName = findViewById(R.id.etFirstName);
         etLastName = findViewById(R.id.etLastName);
@@ -82,7 +83,7 @@ public class SignupActivity extends AppCompatActivity {
 
         assert username != null;
 
-        databaseReference.child(username).get().addOnCompleteListener(task -> {
+        databaseReference.child("Users").child(username).get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult().exists()) {
                 // Username already exists
                 Toast.makeText(SignupActivity.this, "Username already taken. Choose another one.", Toast.LENGTH_SHORT).show();
@@ -94,14 +95,18 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void saveUserToDatabase(String username, String firstName, String lastName, String password, String age) {
+
+        String ownCode = generateRandomCode();
+
         HashMap<String, String> userMap = new HashMap<>();
         userMap.put("firstName", firstName);
         userMap.put("lastName", lastName);
         userMap.put("password", password);
         userMap.put("age", age);
+        userMap.put("familyCode", ownCode);
 
 
-        databaseReference.child(username).setValue(userMap).addOnCompleteListener(task -> {
+        databaseReference.child("Users").child(username).setValue(userMap).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                Toast.makeText(SignupActivity.this, "Signup successful!", Toast.LENGTH_SHORT).show();
                finish();
@@ -110,5 +115,11 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
+        databaseReference.child("Groups").child(ownCode).child("members").child(username).setValue(true);
+
+    }
+
+    private String generateRandomCode() {
+        return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 }

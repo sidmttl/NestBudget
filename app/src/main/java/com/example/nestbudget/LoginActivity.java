@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         // Check if a user is already logged in and redirect
         String loggedInUser = loginManager.getLoggedInUser();
         if (loggedInUser != null) {
-//            navigateToDashboard(loggedInUser);
+            navigateToDashboard(loggedInUser);
         }
 
         // Handle login button click
@@ -64,10 +64,10 @@ public class LoginActivity extends AppCompatActivity {
      *
      * @param username The logged-in username.
      */
-//    private void navigateToDashboard(String username) {
-//        Intent intent = new Intent(A7StickerActivity.this, StickerDashboardActivity.class);
-//        intent.putExtra("USERNAME", username);
-//        startActivity(intent);
-//        finish(); // Close login activity
-//    }
+    private void navigateToDashboard(String username) {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.putExtra("USERNAME", username);
+        startActivity(intent);
+        finish(); // Close login activity
+    }
 }

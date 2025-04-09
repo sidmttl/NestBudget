@@ -18,6 +18,7 @@ public class JoinFamilyActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "UserPrefs";
     private static final String KEY_USERNAME = "username";
+    private static final String KEY_FAMILYCODE  = "familyCode";
 
     private SharedPreferences sharedPreferences;
 
@@ -87,6 +88,7 @@ public class JoinFamilyActivity extends AppCompatActivity {
 
         // Save joined group in user's data
         database.child("Users").child(userId).child("familyCode").setValue(groupCode);
+        sharedPreferences.edit().putString(KEY_FAMILYCODE, groupCode).apply();
 
         Toast.makeText(this, "Joined group: " + groupCode, Toast.LENGTH_SHORT).show();
     }

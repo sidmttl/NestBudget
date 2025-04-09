@@ -73,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.nav_logout) {
                 // Open Logout
+                LoginManager loginManager = new LoginManager(MainActivity.this);
+                loginManager.logout(MainActivity.this);
                 return true;
             }
             drawerLayout.closeDrawers();
