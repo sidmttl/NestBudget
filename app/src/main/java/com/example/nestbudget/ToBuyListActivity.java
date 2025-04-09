@@ -88,6 +88,5 @@ public class ToBuyListActivity extends AppCompatActivity {
                 editTextItem.setText("");
             }
         });
-
     }
 }

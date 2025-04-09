@@ -55,7 +55,7 @@ public class LoginManager {
     }
 
     public void logout(Context context) {
-        sharedPreferences.edit().clear();
+        sharedPreferences.edit().clear().apply();
         Intent intent = new Intent(context, LoginActivity.class);
 
         startActivity(context, intent,null);
