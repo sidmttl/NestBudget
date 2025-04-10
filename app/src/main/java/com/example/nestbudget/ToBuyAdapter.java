@@ -8,20 +8,28 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 
 public class ToBuyAdapter extends RecyclerView.Adapter<ToBuyAdapter.ItemViewHolder> {
     private List<ToBuyList> items;
     private Context context;
+    private String familyCode;
+    private DatabaseReference databaseRef;
 
-    public ToBuyAdapter(Context context, List<ToBuyList> items) {
+    public ToBuyAdapter(Context context, List<ToBuyList> items, String familyCode) {
         this.context = context;
         this.items = items;
+        this.familyCode = familyCode;
+        this.databaseRef = FirebaseDatabase.getInstance().getReference();
     }
 
     public static class ItemViewHolder extends RecyclerView.ViewHolder {
@@ -53,8 +61,18 @@ public class ToBuyAdapter extends RecyclerView.Adapter<ToBuyAdapter.ItemViewHold
 
         // Delete action
         holder.deleteButton.setOnClickListener(v -> {
-            items.remove(position);
-            notifyItemRemoved(position);
+            // Remove from Firebase first
+            databaseRef.child("Groups").child(familyCode).child("journal").child(item.getId()).removeValue()
+                    .addOnSuccessListener(aVoid -> {
+                        // Then remove from local list if Firebase deletion was successful
+                        items.remove(position);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, items.size());
+                        Toast.makeText(context, "Item deleted", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(context, "Failed to delete item", Toast.LENGTH_SHORT).show();
+                    });
         });
 
         // Edit on click
@@ -67,34 +85,42 @@ public class ToBuyAdapter extends RecyclerView.Adapter<ToBuyAdapter.ItemViewHold
         ToBuyList currentItem = items.get(position);
 
         // Inflate custom dialog layout
-        final EditText editTextName = new EditText(context);
-        final EditText editTextContent = new EditText(context);
-        final LinearLayout lay = new LinearLayout(context);
-
-        lay.setOrientation(LinearLayout.VERTICAL);
-        lay.addView(editTextName);
-        lay.addView(editTextContent);
-
+        View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_item, null);
+        final EditText editTextName = dialogView.findViewById(R.id.etItemTitle);
+        final EditText editTextContent = dialogView.findViewById(R.id.etItemContent);
 
         editTextName.setText(currentItem.getName());
         editTextContent.setText(currentItem.getContent());
 
         new AlertDialog.Builder(context)
                 .setTitle("Edit Item")
-                .setView(lay)
+                .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
-                    String newText = editTextName.getText().toString().trim();
-                    String newtext2 = editTextContent.getText().toString().trim();
-                    if (!newText.isEmpty() || !newtext2.isEmpty()) {
-                        currentItem.setName(newText);
-                        currentItem.setContent(newtext2);
-                        notifyItemChanged(position);
+                    String newName = editTextName.getText().toString().trim();
+                    String newContent = editTextContent.getText().toString().trim();
+
+                    if (!newName.isEmpty()) {
+                        // Update the item with new values
+                        currentItem.setName(newName);
+                        currentItem.setContent(newContent);
+
+                        // Update in Firebase
+                        databaseRef.child("Groups").child(familyCode).child("journal")
+                                .child(currentItem.getId()).setValue(currentItem)
+                                .addOnSuccessListener(aVoid -> {
+                                    notifyItemChanged(position);
+                                    Toast.makeText(context, "Item updated", Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(context, "Failed to update item", Toast.LENGTH_SHORT).show();
+                                });
+                    } else {
+                        Toast.makeText(context, "Title cannot be empty", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
-
 
     @Override
     public int getItemCount() {

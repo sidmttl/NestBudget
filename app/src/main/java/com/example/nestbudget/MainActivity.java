@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Bottom Navigation Setup
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.menu_dashboard);
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
