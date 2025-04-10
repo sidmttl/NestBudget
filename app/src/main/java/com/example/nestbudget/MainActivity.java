@@ -3,30 +3,16 @@ package com.example.nestbudget;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.os.Bundle;
 import android.util.TypedValue;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -45,19 +31,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        setContentView(R.layout.activity_main);
+        // Hide the default title that appears before the menu icon
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
 
         // Initialize Drawer Layout
         drawerLayout = findViewById(R.id.drawer_layout);
-
         ImageView menuIcon = findViewById(R.id.menu_icon);
-
         NavigationView navigationView = findViewById(R.id.nav_view);
-
 
         // Handle Navigation Drawer Clicks
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -66,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
             if (itemId == R.id.nav_add_family) {
                 Intent intent = new Intent(MainActivity.this, JoinFamilyActivity.class);
                 startActivity(intent);
-                // Open Settings
                 return true;
             } else if (itemId == R.id.nav_settings) {
                 // Open Settings
@@ -81,9 +67,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-
         menuIcon.setOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
-
 
         // Handle Notification and Profile Clicks
         ImageView notificationIcon = findViewById(R.id.notification_icon);
@@ -105,18 +89,24 @@ public class MainActivity extends AppCompatActivity {
 
         // Bottom Navigation Setup
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        setupBottomNavigation();
+    }
+
+    private void setupBottomNavigation() {
+        // Ensure dashboard is selected when this activity is shown
         bottomNavigationView.setSelectedItemId(R.id.menu_dashboard);
+
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
             if (itemId == R.id.menu_dashboard) {
-                // Open Dashboard
+                // Already on Dashboard, no action needed
                 return true;
             } else if (itemId == R.id.menu_transactions) {
-                // Open Transactions
+                // For now, just show a toast that this feature is coming soon
                 return true;
             } else if (itemId == R.id.menu_insights) {
-                // Open Insights
+                // For now, just show a toast that this feature is coming soon
                 return true;
             } else if (itemId == R.id.menu_journal) {
                 Intent intent = new Intent(MainActivity.this, ToBuyListActivity.class);
@@ -146,5 +136,14 @@ public class MainActivity extends AppCompatActivity {
         pieChart.getLegend().setTextColor(colorPrimary);
         pieChart.setData(pieData);
         pieChart.invalidate();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Make sure Dashboard is selected when returning to this activity
+        if (bottomNavigationView != null) {
+            bottomNavigationView.setSelectedItemId(R.id.menu_dashboard);
+        }
     }
 }

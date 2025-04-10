@@ -9,7 +9,7 @@
         android:id="@+id/etItemTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Item Title"
+        android:hint="Title"
         android:inputType="text"
         android:layout_marginBottom="16dp" />
 
@@ -17,7 +17,7 @@
         android:id="@+id/etItemContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Item Description (optional)"
+        android:hint="Description (optional)"
         android:inputType="textMultiLine"
         android:lines="4"
         android:gravity="top|start" />
