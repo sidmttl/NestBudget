@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,33 +54,48 @@ public class ToBuyAdapter extends RecyclerView.Adapter<ToBuyAdapter.ItemViewHold
 
     @Override
     public void onBindViewHolder(ItemViewHolder holder, int position) {
+        if (position < 0 || position >= items.size()) {
+            return; // Safeguard against out of bounds
+        }
+
         ToBuyList item = items.get(position);
         holder.itemName.setText(item.getName());
         holder.itemContent.setText(item.getContent());
 
         // Delete action
         holder.deleteButton.setOnClickListener(v -> {
-            // Remove from Firebase first
-            databaseRef.child("Groups").child(familyCode).child("journal").child(item.getId()).removeValue()
-                    .addOnSuccessListener(aVoid -> {
-                        // Then remove from local list if Firebase deletion was successful
-                        items.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, items.size());
-                        Toast.makeText(context, "Item deleted", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(context, "Failed to delete item", Toast.LENGTH_SHORT).show();
-                    });
+            // Get the current position - important because position might change during async operation
+            int currentPosition = holder.getAdapterPosition();
+            if (currentPosition != RecyclerView.NO_POSITION && currentPosition < items.size()) {
+                ToBuyList itemToDelete = items.get(currentPosition);
+
+                // Remove from Firebase first
+                databaseRef.child("Groups").child(familyCode).child("journal").child(itemToDelete.getId()).removeValue()
+                        .addOnSuccessListener(aVoid -> {
+                            // Important: Let the ValueEventListener in ToBuyListActivity handle the UI update
+                            // This ensures our view is always in sync with the database
+                            Toast.makeText(context, "Item deleted", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(context, "Failed to delete item", Toast.LENGTH_SHORT).show();
+                        });
+            }
         });
 
         // Edit on click
         holder.itemView.setOnClickListener(v -> {
-            showEditDialog(position);
+            int currentPosition = holder.getAdapterPosition();
+            if (currentPosition != RecyclerView.NO_POSITION && currentPosition < items.size()) {
+                showEditDialog(currentPosition);
+            }
         });
     }
 
     private void showEditDialog(int position) {
+        if (position < 0 || position >= items.size()) {
+            return; // Safeguard against out of bounds
+        }
+
         ToBuyList currentItem = items.get(position);
 
         // Inflate custom dialog layout
@@ -100,15 +114,13 @@ public class ToBuyAdapter extends RecyclerView.Adapter<ToBuyAdapter.ItemViewHold
                     String newContent = editTextContent.getText().toString().trim();
 
                     if (!newName.isEmpty()) {
-                        // Update the item with new values
-                        currentItem.setName(newName);
-                        currentItem.setContent(newContent);
+                        // Create an updated item
+                        ToBuyList updatedItem = new ToBuyList(currentItem.getId(), newName, newContent);
 
-                        // Update in Firebase
+                        // Update in Firebase - let the ValueEventListener handle the UI update
                         databaseRef.child("Groups").child(familyCode).child("journal")
-                                .child(currentItem.getId()).setValue(currentItem)
+                                .child(currentItem.getId()).setValue(updatedItem)
                                 .addOnSuccessListener(aVoid -> {
-                                    notifyItemChanged(position);
                                     Toast.makeText(context, "Item updated", Toast.LENGTH_SHORT).show();
                                 })
                                 .addOnFailureListener(e -> {
