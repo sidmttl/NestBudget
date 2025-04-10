@@ -112,7 +112,8 @@ public class MainActivity extends AppCompatActivity {
                 // Open Dashboard
                 return true;
             } else if (itemId == R.id.menu_transactions) {
-                // Open Transactions
+                Intent intent = new Intent(MainActivity.this, TransactionsActivity.class);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
                 // Open Insights
