@@ -1,180 +1,151 @@
 package com.example.nestbudget;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class TransactionsActivity extends AppCompatActivity {
 
-        private ArrayList<Transaction> transactionList = new ArrayList<>();
-        private RecyclerView transactionRecyclerView;
-        private TransactionAdapter transactionAdapter;
-        private RecyclerView.LayoutManager layoutManager;
-        private FloatingActionButton addTransactionFAB;
+    private RecyclerView recyclerViewTransactions;
+    private TransactionAdapter adapter;
+    private ArrayList<Transaction> transactionList;
+    private FloatingActionButton fabAddTransaction;
+    private BottomNavigationView bottomNavigationView;
 
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_transactions);
+    private String familyCode;
+    private String userID;
 
-            transactionRecyclerView = findViewById(R.id.recyler_view);
-            transactionRecyclerView.setHasFixedSize(true);
-            layoutManager = new LinearLayoutManager(this);
-            transactionRecyclerView.setLayoutManager(layoutManager);
-            transactionAdapter = new TransactionAdapter(transactionList);
-            transactionRecyclerView.setAdapter(transactionAdapter);
+    private DatabaseReference databaseRef;
 
-            addTransactionFAB = findViewById(R.id.floatingActionButton2);
-            addTransactionFAB.setOnClickListener(v -> addTransactionPopUpDialog());
-            itemTouchHelper();
-        }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_transactions);
 
-        private void addTransactionPopUpDialog() {
-            AlertDialog.Builder dialogPopUp = new AlertDialog.Builder(this);
-            dialogPopUp.setTitle("Add New Transaction:");
+        LoginManager loginManager = new LoginManager(this);
+        familyCode = loginManager.getFamilyCode();
+        userID = loginManager.getLoggedInUser();
 
-            final EditText nameInput = new EditText(this);
-            nameInput.setHint("Transaction Name");
-            final EditText amountInput = new EditText(this);
-            amountInput.setHint("Transaction Amount");
-            final EditText categoryInput = new EditText(this);
-            categoryInput.setHint("Transaction Category");
-            final EditText dateInput = new EditText(this);
-            dateInput.setHint("Transaction Date");
-            final EditText locationInput = new EditText(this);
-            locationInput.setHint("Transaction Location");
+        databaseRef = FirebaseDatabase.getInstance().getReference();
 
-            LinearLayout layout = new LinearLayout(this);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setPadding(40, 10, 40, 10);
-            layout.addView(nameInput);
-            layout.addView(amountInput);
-            layout.addView(categoryInput);
-            layout.addView(dateInput);
-            layout.addView(locationInput);
-            dialogPopUp.setView(layout);
+        recyclerViewTransactions = findViewById(R.id.recyler_view);
+        fabAddTransaction = findViewById(R.id.floatingActionButton2);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-            dialogPopUp.setPositiveButton("Add", (dialog, which) -> {
-                try {
-                    String name = nameInput.getText().toString().trim();
-                    String amount = amountInput.getText().toString().trim();
-                    String category = categoryInput.getText().toString().trim();
-                    String date = dateInput.getText().toString().trim();
-                    String location = locationInput.getText().toString().trim();
+        // Set Transactions as the selected item in the bottom navigation
+        bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
 
-                    transactionList.add(0, new Transaction(name, amount, category, date, location));
-                    transactionAdapter.notifyItemInserted(0);
-                    Snackbar.make(transactionRecyclerView, "Transaction added!", Snackbar.LENGTH_LONG)
-                            .setAction("Undo", v -> {
-                                transactionList.remove(0);
-                                transactionAdapter.notifyItemRemoved(0);
-                            }).show();
-                   transactionRecyclerView.scrollToPosition(0);
-                } catch (Exception e) {
-                Log.e("TransactionsActivity", "Error with adding transaction", e);
-                Toast.makeText(this, "An error occurred while adding transaction.", Toast.LENGTH_SHORT).show();
+        // Setup bottom navigation
+        setupBottomNavigation();
+
+        transactionList = new ArrayList<>();
+        adapter = new TransactionAdapter(TransactionsActivity.this, transactionList);
+
+        recyclerViewTransactions.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewTransactions.setAdapter(adapter);
+
+        // Load transactions from Firebase
+        databaseRef.child("Groups").child(familyCode).child("transactions").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                transactionList.clear();
+                for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
+                    Transaction transaction = itemSnapshot.getValue(Transaction.class);
+                    transactionList.add(transaction);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(TransactionsActivity.this, "Failed to load data.", Toast.LENGTH_SHORT).show();
             }
         });
 
-
-            dialogPopUp.show();
-        }
-
-        private void itemTouchHelper() {
-            ItemTouchHelper.SimpleCallback itemSlideLeftOrRight = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-                @Override
-                public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                    return false;
-                }
-
-                @Override
-                public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                    int pos = viewHolder.getAdapterPosition();
-                    if (direction == ItemTouchHelper.RIGHT) {
-                        Transaction deletedTransaction = transactionList.get(pos);
-                        transactionList.remove(pos);
-                        transactionAdapter.notifyItemRemoved(pos);
-
-                        Snackbar.make(transactionRecyclerView, "Transaction deleted!", Snackbar.LENGTH_LONG)
-                                .setAction("Undo", v -> {
-                                    transactionList.add(pos, deletedTransaction);
-                                    transactionAdapter.notifyItemInserted(pos);
-                                }).show();
-                    } else if (direction == ItemTouchHelper.LEFT) {
-                        editTransactionPopUpDialog(pos);
-                        transactionAdapter.notifyItemChanged(pos);
-                    }
-                }
-            };
-
-            new ItemTouchHelper(itemSlideLeftOrRight).attachToRecyclerView(transactionRecyclerView);
-        }
-
-        private void editTransactionPopUpDialog(int pos) {
-            Transaction transactionToEdit = transactionList.get(pos);
-            String oldName = transactionToEdit.getTransactionName();
-            String oldAmount = String.valueOf(transactionToEdit.getTransactionAmt());
-            String oldCategory = transactionToEdit.getTransactionCategory();
-            String oldDate = transactionToEdit.getTransactionDate();
-            String oldLocation = transactionToEdit.getTransactionLocation();
-
-            AlertDialog.Builder dialogPopUp = new AlertDialog.Builder(this);
-            dialogPopUp.setTitle("Edit Transaction:");
-
-            final EditText nameInput = new EditText(this);
-            nameInput.setText(transactionToEdit.getTransactionName());
-            final EditText amountInput = new EditText(this);
-            amountInput.setText(transactionToEdit.getTransactionAmt());
-            final EditText categoryInput = new EditText(this);
-            categoryInput.setText(transactionToEdit.getTransactionCategory());
-            final EditText dateInput = new EditText(this);
-            dateInput.setText(transactionToEdit.getTransactionDate());
-            final EditText locationInput = new EditText(this);
-            locationInput.setText(transactionToEdit.getTransactionLocation());
-
-            LinearLayout layout = new LinearLayout(this);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            layout.setPadding(40, 10, 40, 10);
-            layout.addView(nameInput);
-            layout.addView(amountInput);
-            layout.addView(categoryInput);
-            layout.addView(dateInput);
-            layout.addView(locationInput);
-            dialogPopUp.setView(layout);
-
-            dialogPopUp.setPositiveButton("Save", (dialog, which) -> {
-                transactionToEdit.setTransactionName(nameInput.getText().toString().trim());
-                transactionToEdit.setTransactionAmt(amountInput.getText().toString().trim());
-                transactionToEdit.setTransactionCategory(categoryInput.getText().toString().trim());
-                transactionToEdit.setTransactionDate(dateInput.getText().toString().trim());
-                transactionToEdit.setTransactionLocation(locationInput.getText().toString().trim());
-                transactionAdapter.notifyItemChanged(pos);
-
-                Snackbar.make(transactionRecyclerView, "Transaction updated!", Snackbar.LENGTH_LONG)
-                        .setAction("Undo", v -> {
-                            transactionToEdit.setTransactionName(oldName);
-                            transactionToEdit.setTransactionAmt(oldAmount);
-                            transactionToEdit.setTransactionCategory(oldCategory);
-                            transactionToEdit.setTransactionDate(oldDate);
-                            transactionToEdit.setTransactionLocation(oldLocation);
-                            transactionAdapter.notifyItemChanged(pos);
-                        }).show();
-            });
-
-            dialogPopUp.show();
-        }
+        fabAddTransaction.setOnClickListener(v -> openTransactionDialog());
     }
+
+    private void setupBottomNavigation() {
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.menu_dashboard) {
+                Intent intent = new Intent(TransactionsActivity.this, MainActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.menu_transactions) {
+                // Already on Transactions, no action needed
+                return true;
+            } else if (itemId == R.id.menu_insights) {
+                Toast.makeText(this, "Insights feature coming soon", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.menu_journal) {
+                Intent intent = new Intent(TransactionsActivity.this, ToBuyListActivity.class);
+                startActivity(intent);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void openTransactionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Transaction");
+
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_transaction, null);
+        EditText etName = view.findViewById(R.id.etName);
+        EditText etAmount = view.findViewById(R.id.etAmount);
+        EditText etCategory = view.findViewById(R.id.etCategory);
+        EditText etDate = view.findViewById(R.id.etDate);
+        EditText etNotes = view.findViewById(R.id.etNotes);
+
+        builder.setView(view);
+
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            String name = etName.getText().toString().trim();
+            String amount = etAmount.getText().toString().trim();
+            String category = etCategory.getText().toString().trim();
+            String date = etDate.getText().toString().trim();
+            String notes = etNotes.getText().toString().trim();
+
+            if (!name.isEmpty() && !amount.isEmpty()) {
+                String id = Long.toString(System.currentTimeMillis());
+                Transaction transaction = new Transaction(id, name, amount, category, date, notes);
+                databaseRef.child("Groups").child(familyCode).child("transactions").child(id).setValue(transaction);
+                Toast.makeText(TransactionsActivity.this, "Transaction added successfully!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(TransactionsActivity.this, "Name and amount are required.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+
+        builder.create().show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Make sure Transactions is selected when returning to this activity
+        bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
+    }
+}
