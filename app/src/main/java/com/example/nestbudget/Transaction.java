@@ -1,55 +1,78 @@
 package com.example.nestbudget;
 
 public class Transaction {
-    private  String name;
-    private  String category;
 
-    private  String amount;
-
+    private String id;
+    private String name;
+    private String category;
+    private String amount;
     private String location;
-
     private String date;
 
-    public Transaction(String name, String category, String amount, String location, String date) {
+    public Transaction() {
+        this.id = "";
+        this.name = "";
+        this.category = "";
+        this.amount = "";
+        this.location = "";
+        this.date = "";
+    }
+
+
+    public Transaction(String id, String name, String category, String amount, String location, String date) {
+        this.id = id;
         this.name = name;
         this.category = category;
         this.amount = amount;
         this.location = location;
         this.date = date;
     }
-    public String getTransactionName() {
+
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
         return name;
     }
-    public String getTransactionCategory() {
+
+    public String getCategory() {
         return category;
     }
 
-    public String getTransactionAmt() {
+    public String getAmount() {
         return amount;
     }
-    public String getTransactionLocation() {
+
+    public String getLocation() {
         return location;
     }
 
-    public String getTransactionDate() {
+    public String getDate() {
         return date;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public void setTransactionName(String name){
+    public void setName(String name) {
         this.name = name;
     }
 
-    public void setTransactionCategory(String category){
+    public void setCategory(String category) {
         this.category = category;
     }
 
-    public void setTransactionAmt(String amount){this.amount = amount;}
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
 
-    public void setTransactionLocation(String location){
+    public void setLocation(String location) {
         this.location = location;
     }
-    public void setTransactionDate(String date){
+
+    public void setDate(String date) {
         this.date = date;
     }
 }
