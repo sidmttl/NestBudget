@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/etTransactionName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Transaction Name"
+        android:inputType="text"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/etTransactionCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Transaction Category"
+        android:inputType="text"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/etTransactionAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Transaction Amount"
+        android:inputType="text"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/etTransactionLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Transaction Location"
+        android:inputType="text"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/etTransactionDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Date (e.g., MM/DD/YYYY)"
+        android:inputType="date"
+        android:layout_marginBottom="16dp" />
+
+</LinearLayout>
