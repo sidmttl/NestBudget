@@ -28,51 +28,51 @@ public class Transaction {
         this.date = date;
     }
 
-    public String getId() {
+    public String getTransactionId() {
         return id;
     }
 
-    public String getName() {
+    public String getTransactionName() {
         return name;
     }
 
-    public String getCategory() {
+    public String getTransactionCategory() {
         return category;
     }
 
-    public String getAmount() {
+    public String getTransactionAmount() {
         return amount;
     }
 
-    public String getLocation() {
+    public String getTransactionLocation() {
         return location;
     }
 
-    public String getDate() {
+    public String getTransactionDate() {
         return date;
     }
 
-    public void setId(String id) {
+    public void setTransactionId(String id) {
         this.id = id;
     }
 
-    public void setName(String name) {
+    public void setTransactionName(String name) {
         this.name = name;
     }
 
-    public void setCategory(String category) {
+    public void setTransactionCategory(String category) {
         this.category = category;
     }
 
-    public void setAmount(String amount) {
+    public void setTransactionAmount(String amount) {
         this.amount = amount;
     }
 
-    public void setLocation(String location) {
+    public void setTransactionLocation(String location) {
         this.location = location;
     }
 
-    public void setDate(String date) {
+    public void setTransactionDate(String date) {
         this.date = date;
     }
 }
