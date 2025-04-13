@@ -93,8 +93,8 @@ public class ToBuyListActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_transactions) {
-                // For now, just show a toast
-                Toast.makeText(this, "Transactions feature coming soon", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(ToBuyListActivity.this, TransactionActivity.class);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
                 // For now, just show a toast
