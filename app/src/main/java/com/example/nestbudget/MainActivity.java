@@ -3,30 +3,16 @@ package com.example.nestbudget;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
-import android.os.Bundle;
 import android.util.TypedValue;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -69,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
                 // Open Settings
                 return true;
             } else if (itemId == R.id.nav_settings) {
-                // Open Settings
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.nav_logout) {
                 // Open Logout

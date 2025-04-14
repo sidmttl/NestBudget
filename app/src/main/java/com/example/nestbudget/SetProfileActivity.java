@@ -17,6 +17,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.bumptech.glide.Glide;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import androidx.appcompat.widget.Toolbar;
+
 
 public class SetProfileActivity extends AppCompatActivity {
 
@@ -44,6 +46,14 @@ public class SetProfileActivity extends AppCompatActivity {
         uploadButton = findViewById(R.id.uploadButton);
 
         uploadButton.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
+
+        Toolbar toolbar = findViewById(R.id.family_toolbar);
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);  // Show back arrow
+            getSupportActionBar().setDisplayShowHomeEnabled(true);  // Enable back navigation
+        }
     }
 
     private void uploadImageToFirebase(Uri imageUri) {
@@ -56,5 +66,11 @@ public class SetProfileActivity extends AppCompatActivity {
                     Toast.makeText(this, "Upload successful!", Toast.LENGTH_SHORT).show();
                 }))
                 .addOnFailureListener(e -> Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish(); // Closes this activity and returns to the previous screen
+        return true;
     }
 }
