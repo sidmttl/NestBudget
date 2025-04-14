@@ -13,13 +13,21 @@
         android:inputType="text"
         android:layout_marginBottom="16dp" />
 
-    <EditText
-        android:id="@+id/etTransactionCategory"
+    <TextView
+        android:id="@+id/tvChooseCategory"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Transaction Category"
-        android:inputType="text"
-        android:layout_marginBottom="16dp" />
+        android:text="Transaction Category:"
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp"
+        android:textColor="@android:color/black" />
+
+    <Spinner
+        android:id="@+id/SpinTransactionCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/transaction_categories"
+        android:spinnerMode="dropdown" />
 
     <EditText
         android:id="@+id/etTransactionAmount"
