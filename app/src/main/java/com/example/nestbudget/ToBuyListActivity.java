@@ -126,7 +126,7 @@ public class ToBuyListActivity extends AppCompatActivity {
 
             if (!itemTitle.isEmpty()) {
                 String id = Long.toString(System.currentTimeMillis());
-                ToBuyList newItem = new ToBuyList(id, itemTitle, itemContent);
+                ToBuyList newItem = new ToBuyList(userID, itemTitle, itemContent);
                 databaseRef.child("Groups").child(familyCode).child("journal").child(id).setValue(newItem);
                 // The ValueEventListener will update the UI
             } else {
