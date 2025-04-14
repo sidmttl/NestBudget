@@ -14,8 +14,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import com.google.firebase.database.ValueEventListener;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -27,6 +31,7 @@ public class SettingsActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "UserPrefs";
     private static final String KEY_USERNAME = "username";
     private DatabaseReference database;
+    private String userId;  // moved to class level for reuse
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +53,31 @@ public class SettingsActivity extends AppCompatActivity {
         cancelButton = findViewById(R.id.cancelButton);
 
         sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String userId = sharedPreferences.getString(KEY_USERNAME, null);
+        userId = sharedPreferences.getString(KEY_USERNAME, null);
         database = FirebaseDatabase.getInstance().getReference();
 
         disableEditText(budgetEditText);
         disableEditText(incomeEditText);
+
+        // Fetch values from Firebase and populate fields
+        if (userId != null) {
+            database.child("Users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String budget = snapshot.child("monthlyBudget").getValue(String.class);
+                        String income = snapshot.child("monthlyIncome").getValue(String.class);
+                        if (budget != null) budgetEditText.setText(budget);
+                        if (income != null) incomeEditText.setText(income);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    Toast.makeText(SettingsActivity.this, "Failed to load data.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         editBudgetIcon.setOnClickListener(v -> enableEditing(budgetEditText));
         editIncomeIcon.setOnClickListener(v -> enableEditing(incomeEditText));
