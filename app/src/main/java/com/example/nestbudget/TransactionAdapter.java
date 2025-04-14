@@ -4,8 +4,10 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +37,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         TextView transactionName;
         TextView transactionAmount;
         TextView transactionDate;
+        TextView transactionCategory;
+        TextView transactionLocation;
         ImageButton deleteButton;
 
         public TransactionViewHolder(View itemView) {
@@ -42,9 +46,12 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             transactionName = itemView.findViewById(R.id.transaction_name);
             transactionAmount = itemView.findViewById(R.id.transaction_amount);
             transactionDate = itemView.findViewById(R.id.transaction_date);
+            transactionCategory = itemView.findViewById(R.id.transaction_category);
+            transactionLocation = itemView.findViewById(R.id.transaction_location);
             deleteButton = itemView.findViewById(R.id.buttonDelete);
         }
     }
+
 
     @NonNull
     @Override
@@ -61,10 +68,12 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         }
 
         Transaction transaction = transactions.get(position);
+
         holder.transactionName.setText(transaction.getTransactionName());
         holder.transactionAmount.setText(transaction.getTransactionAmount());
         holder.transactionDate.setText(transaction.getTransactionDate());
-
+        holder.transactionCategory.setText("Category: " + transaction.getTransactionCategory());
+        holder.transactionLocation.setText("Location: " + transaction.getTransactionLocation());
 
         holder.deleteButton.setOnClickListener(v -> {
             int currentPosition = holder.getAdapterPosition();
@@ -74,6 +83,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 databaseRef.child("Groups").child(familyCode).child("transactions")
                         .child(transactionToDelete.getTransactionId()).removeValue()
                         .addOnSuccessListener(aVoid -> {
+                            transactions.remove(currentPosition);
+                            notifyItemRemoved(currentPosition); // Notify adapter about removal
                             Toast.makeText(context, "Transaction deleted", Toast.LENGTH_SHORT).show();
                         })
                         .addOnFailureListener(e -> {
@@ -90,6 +101,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         });
     }
 
+
     private void showEditDialog(int position) {
         if (position < 0 || position >= transactions.size()) {
             return;
@@ -99,24 +111,31 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_transaction, null);
         final EditText editTextName = dialogView.findViewById(R.id.etTransactionName);
-        final EditText editTextCategory = dialogView.findViewById(R.id.etTransactionCategory);
         final EditText editTextAmount = dialogView.findViewById(R.id.etTransactionAmount);
         final EditText editTextLocation = dialogView.findViewById(R.id.etTransactionLocation);
         final EditText editTextDate = dialogView.findViewById(R.id.etTransactionDate);
+        Spinner spinnerCategory = dialogView.findViewById(R.id.SpinTransactionCategory);
 
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                context,
+                R.array.transaction_categories,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(adapter);
 
         editTextName.setText(currentTransaction.getTransactionName());
-        editTextCategory.setText(currentTransaction.getTransactionCategory());
         editTextAmount.setText(currentTransaction.getTransactionAmount());
         editTextLocation.setText(currentTransaction.getTransactionLocation());
         editTextDate.setText(currentTransaction.getTransactionDate());
+        spinnerCategory.setSelection(adapter.getPosition(currentTransaction.getTransactionCategory()));
 
         new AlertDialog.Builder(context)
                 .setTitle("Edit Transaction")
                 .setView(dialogView)
                 .setPositiveButton("Save", (dialog, which) -> {
                     String newName = editTextName.getText().toString().trim();
-                    String newCategory = editTextCategory.getText().toString().trim();
+                    String newCategory = spinnerCategory.getSelectedItem().toString();
                     String newAmount = editTextAmount.getText().toString().trim();
                     String newLocation = editTextLocation.getText().toString().trim();
                     String newDate = editTextDate.getText().toString().trim();
@@ -125,7 +144,6 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                             newLocation.isEmpty() || newDate.isEmpty()) {
                         Toast.makeText(context, "All fields are required!", Toast.LENGTH_SHORT).show();
                     } else {
-
                         Transaction updatedTransaction = new Transaction(
                                 currentTransaction.getTransactionId(),
                                 newName,
@@ -138,6 +156,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                         databaseRef.child("Groups").child(familyCode).child("transactions")
                                 .child(currentTransaction.getTransactionId()).setValue(updatedTransaction)
                                 .addOnSuccessListener(aVoid -> {
+                                    transactions.set(position, updatedTransaction); // Update local list
+                                    notifyItemChanged(position); // Notify RecyclerView of the change
                                     Toast.makeText(context, "Transaction updated", Toast.LENGTH_SHORT).show();
                                 })
                                 .addOnFailureListener(e -> {
@@ -148,6 +168,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                 .setNegativeButton("Cancel", null)
                 .show();
     }
+
+
 
 
     @Override
