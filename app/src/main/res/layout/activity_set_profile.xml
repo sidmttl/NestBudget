@@ -5,20 +5,20 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SetProfileActivity"
-    android:padding="12dp">
+    tools:context=".SetProfileActivity">
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/family_toolbar"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        android:title="My Profile"
-        android:titleTextColor="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:title="My Profile"
+        app:titleTextColor="@android:color/white"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Profile Picture -->
     <ImageView
@@ -42,7 +42,7 @@
         app:layout_constraintTop_toBottomOf="@id/profileImageView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"/>
 
     <!-- First Name -->
     <LinearLayout
@@ -61,14 +61,16 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="First Name"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:layout_marginLeft="5dp"/>
 
         <ImageView
             android:id="@+id/editFirstNameIcon"
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:src="@drawable/ic_edit"
-            android:contentDescription="Edit First Name" />
+            android:contentDescription="Edit First Name"
+            android:layout_marginEnd="5dp"/>
     </LinearLayout>
 
     <EditText
@@ -81,7 +83,8 @@
         android:enabled="false"
         app:layout_constraintTop_toBottomOf="@id/firstNameLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="5dp" />
 
     <!-- Last Name -->
     <LinearLayout
@@ -100,14 +103,16 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Last Name"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:layout_marginLeft="5dp"/>
 
         <ImageView
             android:id="@+id/editLastNameIcon"
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:src="@drawable/ic_edit"
-            android:contentDescription="Edit Last Name" />
+            android:contentDescription="Edit Last Name"
+            android:layout_marginEnd="5dp"/>
     </LinearLayout>
 
     <EditText
@@ -120,7 +125,8 @@
         android:enabled="false"
         app:layout_constraintTop_toBottomOf="@id/lastNameLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="5dp"/>
 
     <!-- Age -->
     <LinearLayout
@@ -139,14 +145,16 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Age"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:layout_marginLeft="5dp"/>
 
         <ImageView
             android:id="@+id/editAgeIcon"
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:src="@drawable/ic_edit"
-            android:contentDescription="Edit Age" />
+            android:contentDescription="Edit Age"
+            android:layout_marginEnd="5dp"/>
     </LinearLayout>
 
     <EditText
@@ -160,7 +168,8 @@
         android:enabled="false"
         app:layout_constraintTop_toBottomOf="@id/ageLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="5dp"/>
 
     <!-- Family Group ID (Read Only) -->
     <TextView
@@ -171,7 +180,8 @@
         android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@id/ageEditText"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="12dp" />
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="5dp"/>
 
     <EditText
         android:id="@+id/familyGroupIdEditText"
@@ -185,7 +195,8 @@
         android:clickable="false"
         app:layout_constraintTop_toBottomOf="@id/familyLabel"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="5dp"/>
 
     <!-- Buttons -->
     <LinearLayout
@@ -205,7 +216,8 @@
             android:layout_weight="1"
             android:layout_height="42dp"
             android:text="Confirm"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:layout_marginLeft="15dp"/>
 
         <Button
             android:id="@+id/btnCancel"
@@ -214,6 +226,7 @@
             android:layout_height="42dp"
             android:layout_marginStart="8dp"
             android:text="Cancel"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:layout_marginEnd="15dp"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
