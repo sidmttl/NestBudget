@@ -1,6 +1,7 @@
 package com.example.nestbudget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,7 +25,7 @@ import com.google.firebase.storage.StorageReference;
 public class SetProfileActivity extends AppCompatActivity {
 
     private ImageView profileImageView;
-    private Button uploadButton, confirmButton;
+    private Button uploadButton, confirmButton, cancelButton;
     private Uri selectedImageUri;
 
     private EditText firstNameEditText, lastNameEditText, ageEditText, familyGroupIdEditText;
@@ -54,6 +55,7 @@ public class SetProfileActivity extends AppCompatActivity {
         profileImageView = findViewById(R.id.profileImageView);
         uploadButton = findViewById(R.id.uploadButton);
         confirmButton = findViewById(R.id.confirmButton);  // Added Confirm button
+        cancelButton = findViewById(R.id.btnCancel);
 
         firstNameEditText = findViewById(R.id.firstNameEditText);
         lastNameEditText = findViewById(R.id.lastNameEditText);
@@ -126,6 +128,11 @@ public class SetProfileActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+
+        cancelButton.setOnClickListener(v -> {
+            startActivity(new Intent(SetProfileActivity.this, MainActivity.class));
+            finish();
+        });
     }
 
     private void fetchUserProfile(String userId) {
