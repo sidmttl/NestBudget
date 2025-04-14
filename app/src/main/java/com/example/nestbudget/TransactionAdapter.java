@@ -84,7 +84,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                         .child(transactionToDelete.getTransactionId()).removeValue()
                         .addOnSuccessListener(aVoid -> {
                             transactions.remove(currentPosition);
-                            notifyItemRemoved(currentPosition); // Notify adapter about removal
+                            notifyItemRemoved(currentPosition);
                             Toast.makeText(context, "Transaction deleted", Toast.LENGTH_SHORT).show();
                         })
                         .addOnFailureListener(e -> {
@@ -156,8 +156,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                         databaseRef.child("Groups").child(familyCode).child("transactions")
                                 .child(currentTransaction.getTransactionId()).setValue(updatedTransaction)
                                 .addOnSuccessListener(aVoid -> {
-                                    transactions.set(position, updatedTransaction); // Update local list
-                                    notifyItemChanged(position); // Notify RecyclerView of the change
+                                    transactions.set(position, updatedTransaction);
+                                    notifyItemChanged(position);
                                     Toast.makeText(context, "Transaction updated", Toast.LENGTH_SHORT).show();
                                 })
                                 .addOnFailureListener(e -> {
