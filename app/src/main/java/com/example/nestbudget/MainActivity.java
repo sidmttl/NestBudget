@@ -116,7 +116,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
-                // Open Insights
+                Intent intent = new Intent(MainActivity.this, InsightsActivity.class);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_journal) {
                 Intent intent = new Intent(MainActivity.this, ToBuyListActivity.class);
