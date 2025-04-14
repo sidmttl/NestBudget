@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="colorFoodDining">#ea5545</color>
+    <color name="colorGroceries">#f46a9b</color>
+    <color name="colorMedical">#ef9b20</color>--
+    <color name="colorBills">#b33dc6</color>
+    <color name="colorTravel">#ede15b</color>
+    <color name="colorEntertainment">#87bc45</color>--
+    <color name="colorOther">#27aeef</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="red">#FF0000</color>
@@ -7,4 +14,7 @@
     <color name="green">#008000</color>     <!-- Green color -->
     <color name="yellow">#FFFF00</color>    <!-- Yellow color -->
     <color name="purple">#800080</color>    <!-- Purple color -->
+
+
 </resources>
+

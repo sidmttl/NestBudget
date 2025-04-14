@@ -1,5 +1,6 @@
 package com.example.nestbudget;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -11,7 +12,7 @@ import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,6 +35,8 @@ public class InsightsActivity extends AppCompatActivity {
     private DatabaseReference databaseRef;
     private ArrayList<Transaction> transactionList;
 
+    private Map<String, Integer> pieChartColors;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,11 +57,10 @@ public class InsightsActivity extends AppCompatActivity {
         databaseRef = FirebaseDatabase.getInstance().getReference();
         transactionList = new ArrayList<>();
 
-//        setupBottomNavigation();
+        setupBottomNavigation();
         fetchTransactions();
     }
 
-    //
     private void fetchTransactions() {
         databaseRef.child("Groups").child(familyCode).child("transactions")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -96,7 +98,14 @@ public class InsightsActivity extends AppCompatActivity {
         }
 
         Map<String, Double> categoryTotals = new HashMap<>();
-
+        pieChartColors = new HashMap<>();
+        pieChartColors.put("Food + Dining", getResources().getColor(R.color.colorFoodDining));
+        pieChartColors.put("Groceries", getResources().getColor(R.color.colorGroceries));
+        pieChartColors.put("Medical", getResources().getColor(R.color.colorMedical));
+        pieChartColors.put("Bills", getResources().getColor(R.color.colorBills));
+        pieChartColors.put("Travel", getResources().getColor(R.color.colorTravel));
+        pieChartColors.put("Entertainment", getResources().getColor(R.color.colorEntertainment));
+        pieChartColors.put("Other", getResources().getColor(R.color.colorOther));
 
         for (Transaction transaction : transactionList) {
             String category = transaction.getTransactionCategory();
@@ -113,16 +122,30 @@ public class InsightsActivity extends AppCompatActivity {
         }
 
         ArrayList<PieEntry> pieEntries = new ArrayList<>();
+        ArrayList<Integer> colors = new ArrayList<>();
+
         for (Map.Entry<String, Double> entry : categoryTotals.entrySet()) {
             pieEntries.add(new PieEntry(entry.getValue().floatValue(), entry.getKey()));
+            Integer color = pieChartColors.get(entry.getKey());
+            colors.add(color);
+
         }
 
-        PieDataSet dataSet = new PieDataSet(pieEntries, "Transaction Categories");
-        dataSet.setColors(ColorTemplate.MATERIAL_COLORS, this);
+        PieDataSet dataSet = new PieDataSet(pieEntries, "Categories");
+        dataSet.setColors(colors);
         dataSet.setValueTextSize(12f);
 
+        // Custom formatter to display decimals
         PieData data = new PieData(dataSet);
+        data.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.format("%.2f", value);
+            }
+        });
+        dataSet.setValueTextSize(12f);
         pieChart.setData(data);
+
         pieChart.setDrawHoleEnabled(true);
         pieChart.setHoleRadius(40f);
         pieChart.setTransparentCircleRadius(45f);
@@ -131,27 +154,33 @@ public class InsightsActivity extends AppCompatActivity {
 
 
 
-//
-//    private void setupBottomNavigation() {
-//        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-//            int itemId = item.getItemId();
-//
-//            if (itemId == R.id.menu_dashboard) {
-//                return true;
-//            } else if (itemId == R.id.menu_transactions) {
-//                return true;
-//            } else if (itemId == R.id.menu_insights) {
-//                return true;
-//            } else if (itemId == R.id.menu_journal) {
-//                return true;
-//            }
-//            return false;
-//        });
-//    }
-//
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        bottomNavigationView.setSelectedItemId(R.id.menu_insights);
-//    }
+
+    private void setupBottomNavigation() {
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.menu_dashboard) {
+                Intent intent = new Intent(InsightsActivity.this, MainActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.menu_transactions) {
+                Intent intent = new Intent(InsightsActivity.this, TransactionActivity.class);
+                startActivity(intent);
+                return true;
+            } else if (itemId == R.id.menu_insights) {
+                return true;
+            } else if (itemId == R.id.menu_journal) {
+                Intent intent = new Intent(InsightsActivity.this, ToBuyListActivity.class);
+                startActivity(intent);
+                return true;
+            }
+            return false;
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bottomNavigationView.setSelectedItemId(R.id.menu_insights);
+    }
 }
