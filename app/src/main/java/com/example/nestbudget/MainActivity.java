@@ -2,15 +2,20 @@ package com.example.nestbudget;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -47,10 +52,12 @@ public class MainActivity extends AppCompatActivity {
     private TextView cashAmountTextView;
     private TextView savingsAmountTextView;
     private TextView investmentsAmountTextView;
+
+    // Budget tracker elements
     private TextView budgetSpentTextView;
     private TextView budgetTotalTextView;
     private ProgressBar budgetProgressBar;
-    private LinearLayout categoriesContainer;
+
     private LinearLayout upcomingBillsContainer;
     private LinearLayout goalsContainer;
     private TextView addGoalButton;
@@ -104,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
         budgetSpentTextView = findViewById(R.id.budget_spent);
         budgetTotalTextView = findViewById(R.id.budget_total);
         budgetProgressBar = findViewById(R.id.budgetBar);
-        categoriesContainer = findViewById(R.id.categories_container);
 
         // Upcoming bills
         upcomingBillsContainer = findViewById(R.id.upcoming_bills_container);
@@ -128,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Add goal button click
         addGoalButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Add goal feature coming soon!", Toast.LENGTH_SHORT).show();
+            showAddGoalDialog();
         });
     }
 
@@ -221,35 +227,15 @@ public class MainActivity extends AppCompatActivity {
         // For demo purposes, we'll use sample data
         double budgetTotal = 1000.00;
         double budgetSpent = 750.00;
+        double budgetRemaining = budgetTotal - budgetSpent;
 
+        // Update Budget UI
         budgetSpentTextView.setText(String.format("$%.0f Spent", budgetSpent));
         budgetTotalTextView.setText(String.format("of $%.0f", budgetTotal));
+
+        // Set up budget progress bar - the progress represents amount spent
         budgetProgressBar.setMax((int)budgetTotal);
         budgetProgressBar.setProgress((int)budgetSpent);
-
-        // Load category data
-        List<BudgetCategory> categories = new ArrayList<>();
-        categories.add(new BudgetCategory("Savings", 300, 400));
-
-        // Clear container
-        categoriesContainer.removeAllViews();
-
-        // Add category views
-        LayoutInflater inflater = LayoutInflater.from(this);
-        for (BudgetCategory category : categories) {
-            View categoryView = inflater.inflate(R.layout.item_budget_category, categoriesContainer, false);
-
-            TextView categoryNameTextView = categoryView.findViewById(R.id.category_name);
-            TextView categoryAmountTextView = categoryView.findViewById(R.id.category_amount);
-            ProgressBar categoryProgressBar = categoryView.findViewById(R.id.category_progress);
-
-            categoryNameTextView.setText(category.name);
-            categoryAmountTextView.setText(String.format("$%d / $%d", category.spent, category.budget));
-            categoryProgressBar.setMax(category.budget);
-            categoryProgressBar.setProgress(category.spent);
-
-            categoriesContainer.addView(categoryView);
-        }
     }
 
     private void loadUpcomingBills() {
@@ -329,46 +315,304 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadFinancialGoals() {
-        // Sample goals data
-        List<FinancialGoal> goals = new ArrayList<>();
-        goals.add(new FinancialGoal("Vacation Fund", 1500, 3000));
-        goals.add(new FinancialGoal("Emergency Fund", 4500, 6000));
-        goals.add(new FinancialGoal("New Car", 2000, 10000));
+        // Get goals from Firebase
+        databaseRef.child("Groups").child(familyCode).child("goals")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        // Clear container
+                        goalsContainer.removeAllViews();
 
-        // Clear container and remove sample goals
-        goalsContainer.removeAllViews();
+                        // Check if goals exist
+                        if (!snapshot.exists() || !snapshot.hasChildren()) {
+                            // No goals found, show a message
+                            TextView noGoalsText = new TextView(MainActivity.this);
+                            noGoalsText.setText("No financial goals yet. Add your first goal!");
+                            noGoalsText.setTextSize(16);
+                            noGoalsText.setPadding(16, 16, 16, 16);
+                            goalsContainer.addView(noGoalsText);
+                            return;
+                        }
 
-        // Add goal views
-        LayoutInflater inflater = LayoutInflater.from(this);
+                        // Add each goal to the container
+                        LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
 
-        for (FinancialGoal goal : goals) {
-            View goalView = inflater.inflate(R.layout.item_financial_goal, goalsContainer, false);
+                        for (DataSnapshot goalSnapshot : snapshot.getChildren()) {
+                            FinancialGoal goal = goalSnapshot.getValue(FinancialGoal.class);
+                            if (goal != null) {
+                                addGoalView(inflater, goal);
+                            }
+                        }
+                    }
 
-            TextView goalNameTextView = goalView.findViewById(R.id.goal_name);
-            TextView goalAmountTextView = goalView.findViewById(R.id.goal_amount);
-            ProgressBar goalProgressBar = goalView.findViewById(R.id.goal_progress);
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(MainActivity.this, "Failed to load goals: " + error.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 
-            goalNameTextView.setText(goal.name);
-            goalAmountTextView.setText(String.format("$%d / $%d", goal.saved, goal.target));
-            goalProgressBar.setMax(goal.target);
-            goalProgressBar.setProgress(goal.saved);
+    private void addGoalView(LayoutInflater inflater, FinancialGoal goal) {
+        View goalView = inflater.inflate(R.layout.item_financial_goal, goalsContainer, false);
 
-            goalsContainer.addView(goalView);
+        TextView goalNameTextView = goalView.findViewById(R.id.goal_name);
+        TextView goalAmountTextView = goalView.findViewById(R.id.goal_amount);
+        ProgressBar goalProgressBar = goalView.findViewById(R.id.goal_progress);
+
+        goalNameTextView.setText(goal.getName());
+        goalAmountTextView.setText(String.format("$%.0f / $%.0f",
+                goal.getCurrentAmount(), goal.getTargetAmount()));
+
+        goalProgressBar.setMax((int) goal.getTargetAmount());
+        goalProgressBar.setProgress((int) goal.getCurrentAmount());
+
+        // Add click listener to edit the goal
+        goalView.setOnClickListener(v -> showEditGoalDialog(goal));
+
+        goalsContainer.addView(goalView);
+    }
+
+    private void showAddGoalDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Financial Goal");
+
+        // Inflate the dialog layout
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_goal, null);
+        builder.setView(view);
+
+        // Get references to dialog views
+        EditText etGoalName = view.findViewById(R.id.et_goal_name);
+        EditText etGoalTarget = view.findViewById(R.id.et_goal_target);
+        EditText etGoalCurrent = view.findViewById(R.id.et_goal_current);
+        Spinner spinnerCategory = view.findViewById(R.id.spinner_goal_category);
+
+        // Create category adapter
+        String[] categories = {"Savings", "Education", "Vacation", "Home", "Vehicle", "Emergency", "Retirement", "Other"};
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, categories);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(categoryAdapter);
+
+        // Setup dialog buttons
+        builder.setPositiveButton("Add", null); // We'll set this later to prevent auto-dismiss
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Override the positive button to validate input
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String name = etGoalName.getText().toString().trim();
+            String targetStr = etGoalTarget.getText().toString().trim();
+            String currentStr = etGoalCurrent.getText().toString().trim();
+            String category = spinnerCategory.getSelectedItem().toString();
+
+            // Validate input
+            if (name.isEmpty()) {
+                etGoalName.setError("Please enter a name");
+                return;
+            }
+
+            if (targetStr.isEmpty()) {
+                etGoalTarget.setError("Please enter a target amount");
+                return;
+            }
+
+            double target;
+            double current = 0;
+
+            try {
+                target = Double.parseDouble(targetStr);
+                if (target <= 0) {
+                    etGoalTarget.setError("Amount must be greater than 0");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                etGoalTarget.setError("Invalid amount");
+                return;
+            }
+
+            if (!currentStr.isEmpty()) {
+                try {
+                    current = Double.parseDouble(currentStr);
+                    if (current < 0) {
+                        etGoalCurrent.setError("Amount cannot be negative");
+                        return;
+                    }
+                    if (current > target) {
+                        etGoalCurrent.setError("Current amount cannot exceed target");
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    etGoalCurrent.setError("Invalid amount");
+                    return;
+                }
+            }
+
+            // Create new goal
+            String goalId = databaseRef.child("Groups").child(familyCode).child("goals").push().getKey();
+            if (goalId != null) {
+                FinancialGoal newGoal = new FinancialGoal(
+                        goalId,
+                        name,
+                        target,
+                        current,
+                        category,
+                        userId
+                );
+
+                // Save to Firebase
+                databaseRef.child("Groups").child(familyCode).child("goals").child(goalId)
+                        .setValue(newGoal)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(MainActivity.this, "Goal added successfully", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(MainActivity.this, "Failed to add goal: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        });
+            }
+        });
+    }
+
+    private void showEditGoalDialog(FinancialGoal goal) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Financial Goal");
+
+        // Inflate the dialog layout
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_goal, null);
+        builder.setView(view);
+
+        // Get references to dialog views
+        EditText etGoalName = view.findViewById(R.id.et_goal_name);
+        EditText etGoalTarget = view.findViewById(R.id.et_goal_target);
+        EditText etGoalCurrent = view.findViewById(R.id.et_goal_current);
+        Spinner spinnerCategory = view.findViewById(R.id.spinner_goal_category);
+
+        // Create category adapter
+        String[] categories = {"Savings", "Education", "Vacation", "Home", "Vehicle", "Emergency", "Retirement", "Other"};
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, categories);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(categoryAdapter);
+
+        // Fill with existing data
+        etGoalName.setText(goal.getName());
+        etGoalTarget.setText(String.format(Locale.getDefault(), "%.0f", goal.getTargetAmount()));
+        etGoalCurrent.setText(String.format(Locale.getDefault(), "%.0f", goal.getCurrentAmount()));
+
+        // Set selected category
+        for (int i = 0; i < categories.length; i++) {
+            if (categories[i].equals(goal.getCategory())) {
+                spinnerCategory.setSelection(i);
+                break;
+            }
         }
+
+        // Add option to delete
+        builder.setNeutralButton("Delete", (dialog, which) -> {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Confirm Delete")
+                    .setMessage("Are you sure you want to delete this goal?")
+                    .setPositiveButton("Yes", (dialogInterface, i) -> {
+                        // Delete from Firebase
+                        databaseRef.child("Groups").child(familyCode).child("goals").child(goal.getId())
+                                .removeValue()
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(MainActivity.this, "Goal deleted", Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(MainActivity.this, "Failed to delete goal",
+                                            Toast.LENGTH_SHORT).show();
+                                });
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        });
+
+        // Setup dialog buttons
+        builder.setPositiveButton("Save", null); // We'll set this later to prevent auto-dismiss
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Override the positive button to validate input
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String name = etGoalName.getText().toString().trim();
+            String targetStr = etGoalTarget.getText().toString().trim();
+            String currentStr = etGoalCurrent.getText().toString().trim();
+            String category = spinnerCategory.getSelectedItem().toString();
+
+            // Validate input
+            if (name.isEmpty()) {
+                etGoalName.setError("Please enter a name");
+                return;
+            }
+
+            if (targetStr.isEmpty()) {
+                etGoalTarget.setError("Please enter a target amount");
+                return;
+            }
+
+            double target;
+            double current = 0;
+
+            try {
+                target = Double.parseDouble(targetStr);
+                if (target <= 0) {
+                    etGoalTarget.setError("Amount must be greater than 0");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                etGoalTarget.setError("Invalid amount");
+                return;
+            }
+
+            if (!currentStr.isEmpty()) {
+                try {
+                    current = Double.parseDouble(currentStr);
+                    if (current < 0) {
+                        etGoalCurrent.setError("Amount cannot be negative");
+                        return;
+                    }
+                    if (current > target) {
+                        etGoalCurrent.setError("Current amount cannot exceed target");
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    etGoalCurrent.setError("Invalid amount");
+                    return;
+                }
+            }
+
+            // Update goal
+            FinancialGoal updatedGoal = new FinancialGoal(
+                    goal.getId(),
+                    name,
+                    target,
+                    current,
+                    category,
+                    goal.getCreatedBy() // preserve the original creator
+            );
+
+            // Save to Firebase
+            databaseRef.child("Groups").child(familyCode).child("goals").child(goal.getId())
+                    .setValue(updatedGoal)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(MainActivity.this, "Goal updated successfully", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(MainActivity.this, "Failed to update goal: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    });
+        });
     }
 
     // Helper classes for data models
-    private static class BudgetCategory {
-        String name;
-        int spent;
-        int budget;
-
-        BudgetCategory(String name, int spent, int budget) {
-            this.name = name;
-            this.spent = spent;
-            this.budget = budget;
-        }
-    }
 
     private static class Bill {
         String name;
@@ -379,18 +623,6 @@ public class MainActivity extends AppCompatActivity {
             this.name = name;
             this.amount = amount;
             this.dueDate = dueDate;
-        }
-    }
-
-    private static class FinancialGoal {
-        String name;
-        int saved;
-        int target;
-
-        FinancialGoal(String name, int saved, int target) {
-            this.name = name;
-            this.saved = saved;
-            this.target = target;
         }
     }
 }
