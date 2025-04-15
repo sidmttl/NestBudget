@@ -1,11 +1,14 @@
 package com.example.nestbudget;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar budgetProgressBar;
 
     private LinearLayout upcomingBillsContainer;
+    private TextView addBillButton;
     private LinearLayout goalsContainer;
     private TextView addGoalButton;
 
@@ -114,6 +119,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Upcoming bills
         upcomingBillsContainer = findViewById(R.id.upcoming_bills_container);
+        addBillButton = findViewById(R.id.add_bill_button);
+
+        // Add bill button click
+        addBillButton.setOnClickListener(v -> {
+            showAddBillDialog();
+        });
 
         // Financial goals
         goalsContainer = findViewById(R.id.goals_container);
@@ -239,79 +250,356 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadUpcomingBills() {
-        // Sample bills data
-        List<Bill> bills = new ArrayList<>();
+        // Get bills from Firebase
+        databaseRef.child("Groups").child(familyCode).child("bills")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        // Clear container
+                        upcomingBillsContainer.removeAllViews();
 
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, 15); // Due in 15 days
-        bills.add(new Bill("Rent", 1200.00, cal.getTime()));
+                        // Check if bills exist
+                        if (!snapshot.exists() || !snapshot.hasChildren()) {
+                            // No bills found, show a message
+                            TextView noBillsText = new TextView(MainActivity.this);
+                            noBillsText.setText("No upcoming bills. Add your first bill!");
+                            noBillsText.setTextSize(16);
+                            noBillsText.setPadding(16, 16, 16, 16);
+                            upcomingBillsContainer.addView(noBillsText);
+                            return;
+                        }
 
-        cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, 7); // Due in 7 days
-        bills.add(new Bill("Electricity", 85.00, cal.getTime()));
+                        // Create bills list
+                        List<Bill> bills = new ArrayList<>();
+                        for (DataSnapshot billSnapshot : snapshot.getChildren()) {
+                            Bill bill = billSnapshot.getValue(Bill.class);
+                            if (bill != null && !bill.isPaid()) {
+                                bills.add(bill);
+                            }
+                        }
 
-        cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, 3); // Due in 3 days
-        bills.add(new Bill("Internet", 65.00, cal.getTime()));
+                        // Sort bills by due date (closest first)
+                        Collections.sort(bills, (bill1, bill2) -> bill1.getDueDate().compareTo(bill2.getDueDate()));
 
-        cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, -2); // Overdue by 2 days
-        bills.add(new Bill("Water", 45.00, cal.getTime()));
+                        // Add bill views
+                        LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd", Locale.getDefault());
 
-        // Clear container and remove sample bills
-        upcomingBillsContainer.removeAllViews();
+                        for (Bill bill : bills) {
+                            View billView = inflater.inflate(R.layout.item_upcoming_bill, upcomingBillsContainer, false);
 
-        // Add bill views
-        LayoutInflater inflater = LayoutInflater.from(this);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd", Locale.getDefault());
+                            TextView billNameTextView = billView.findViewById(R.id.bill_name);
+                            TextView billAmountTextView = billView.findViewById(R.id.bill_amount);
+                            TextView billDueDateTextView = billView.findViewById(R.id.bill_due_date);
 
-        for (Bill bill : bills) {
-            View billView = inflater.inflate(R.layout.item_upcoming_bill, upcomingBillsContainer, false);
+                            billNameTextView.setText(bill.getName());
+                            billAmountTextView.setText(String.format("$%.0f", bill.getAmount()));
 
-            TextView billNameTextView = billView.findViewById(R.id.bill_name);
-            TextView billAmountTextView = billView.findViewById(R.id.bill_amount);
-            TextView billDueDateTextView = billView.findViewById(R.id.bill_due_date);
+                            String dueDate = dateFormat.format(bill.getDueDate());
 
-            billNameTextView.setText(bill.name);
-            billAmountTextView.setText(String.format("$%.0f", bill.amount));
+                            // Check if bill is overdue
+                            if (bill.isOverdue()) {
+                                billDueDateTextView.setText("Overdue: " + dueDate);
+                                billDueDateTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                            } else {
+                                // Check if bill is due soon (within 7 days)
+                                long daysUntilDue = bill.daysUntilDue();
 
-            String dueDate = dateFormat.format(bill.dueDate);
+                                if (daysUntilDue <= 7) {
+                                    billDueDateTextView.setText("Due: " + dueDate);
+                                    billDueDateTextView.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
+                                } else {
+                                    billDueDateTextView.setText("Due: " + dueDate);
+                                    billDueDateTextView.setTextColor(getResources().getColor(android.R.color.darker_gray));
+                                }
+                            }
 
-            // Check if bill is overdue
-            if (bill.dueDate.before(new Date())) {
-                billDueDateTextView.setText("Overdue: " + dueDate);
-                billDueDateTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-            } else {
-                // Check if bill is due soon (within 7 days)
-                Calendar cal1 = Calendar.getInstance();
-                Calendar cal2 = Calendar.getInstance();
-                cal2.setTime(bill.dueDate);
+                            // Set click listener to edit bill
+                            billView.setOnClickListener(v -> showEditBillDialog(bill));
 
-                long diffInDays = (cal2.getTimeInMillis() - cal1.getTimeInMillis()) / (24 * 60 * 60 * 1000);
+                            upcomingBillsContainer.addView(billView);
 
-                if (diffInDays <= 7) {
-                    billDueDateTextView.setText("Due: " + dueDate);
-                    billDueDateTextView.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
-                } else {
-                    billDueDateTextView.setText("Due: " + dueDate);
-                    billDueDateTextView.setTextColor(getResources().getColor(android.R.color.darker_gray));
-                }
+                            // Add divider if not the last item
+                            if (bills.indexOf(bill) < bills.size() - 1) {
+                                View divider = new View(MainActivity.this);
+                                divider.setLayoutParams(new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.MATCH_PARENT,
+                                        1
+                                ));
+                                divider.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+                                divider.setAlpha(0.5f);
+                                upcomingBillsContainer.addView(divider);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(MainActivity.this, "Failed to load bills: " + error.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void showAddBillDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Upcoming Bill");
+
+        // Inflate the dialog layout
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_bill, null);
+        builder.setView(view);
+
+        // Get references to dialog views
+        EditText etBillName = view.findViewById(R.id.et_bill_name);
+        EditText etBillAmount = view.findViewById(R.id.et_bill_amount);
+        Button btnPickDate = view.findViewById(R.id.btn_pick_date);
+        TextView tvSelectedDate = view.findViewById(R.id.tv_selected_date);
+        Spinner spinnerCategory = view.findViewById(R.id.spinner_bill_category);
+        CheckBox checkboxPaid = view.findViewById(R.id.checkbox_bill_paid);
+
+        // Create category adapter
+        String[] categories = {"Rent/Mortgage", "Utilities", "Internet/Phone", "Insurance", "Subscription", "Credit Card", "Loan", "Other"};
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, categories);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(categoryAdapter);
+
+        // Date selection
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, 7); // Default to 7 days from now
+        final Date[] selectedDate = {calendar.getTime()};
+
+        // Format and show the default date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+        tvSelectedDate.setText(dateFormat.format(selectedDate[0]));
+
+        btnPickDate.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    MainActivity.this,
+                    (view1, year, month, dayOfMonth) -> {
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, month);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        selectedDate[0] = calendar.getTime();
+                        tvSelectedDate.setText(dateFormat.format(selectedDate[0]));
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+            );
+            datePickerDialog.show();
+        });
+
+        // Setup dialog buttons
+        builder.setPositiveButton("Add", null); // We'll set this later to prevent auto-dismiss
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Override the positive button to validate input
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String name = etBillName.getText().toString().trim();
+            String amountStr = etBillAmount.getText().toString().trim();
+            String category = spinnerCategory.getSelectedItem().toString();
+            boolean isPaid = checkboxPaid.isChecked();
+
+            // Validate input
+            if (name.isEmpty()) {
+                etBillName.setError("Please enter a name");
+                return;
             }
 
-            upcomingBillsContainer.addView(billView);
+            if (amountStr.isEmpty()) {
+                etBillAmount.setError("Please enter an amount");
+                return;
+            }
 
-            // Add divider if not the last item
-            if (bills.indexOf(bill) < bills.size() - 1) {
-                View divider = new View(this);
-                divider.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        1
-                ));
-                divider.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
-                divider.setAlpha(0.5f);
-                upcomingBillsContainer.addView(divider);
+            double amount;
+            try {
+                amount = Double.parseDouble(amountStr);
+                if (amount <= 0) {
+                    etBillAmount.setError("Amount must be greater than 0");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                etBillAmount.setError("Invalid amount");
+                return;
+            }
+
+            // Create new bill
+            String billId = databaseRef.child("Groups").child(familyCode).child("bills").push().getKey();
+            if (billId != null) {
+                Bill newBill = new Bill(
+                        billId,
+                        name,
+                        amount,
+                        selectedDate[0],
+                        isPaid,
+                        category,
+                        userId
+                );
+
+                // Save to Firebase
+                databaseRef.child("Groups").child(familyCode).child("bills").child(billId)
+                        .setValue(newBill)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(MainActivity.this, "Bill added successfully", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(MainActivity.this, "Failed to add bill: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show();
+                        });
+            }
+        });
+    }
+
+    private void showEditBillDialog(Bill bill) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Edit Bill");
+
+        // Inflate the dialog layout
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_bill, null);
+        builder.setView(view);
+
+        // Get references to dialog views
+        EditText etBillName = view.findViewById(R.id.et_bill_name);
+        EditText etBillAmount = view.findViewById(R.id.et_bill_amount);
+        Button btnPickDate = view.findViewById(R.id.btn_pick_date);
+        TextView tvSelectedDate = view.findViewById(R.id.tv_selected_date);
+        Spinner spinnerCategory = view.findViewById(R.id.spinner_bill_category);
+        CheckBox checkboxPaid = view.findViewById(R.id.checkbox_bill_paid);
+
+        // Create category adapter
+        String[] categories = {"Rent/Mortgage", "Utilities", "Internet/Phone", "Insurance", "Subscription", "Credit Card", "Loan", "Other"};
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_item, categories);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(categoryAdapter);
+
+        // Fill with existing data
+        etBillName.setText(bill.getName());
+        etBillAmount.setText(String.format(Locale.getDefault(), "%.2f", bill.getAmount()));
+        checkboxPaid.setChecked(bill.isPaid());
+
+        // Set selected category
+        for (int i = 0; i < categories.length; i++) {
+            if (categories[i].equals(bill.getCategory())) {
+                spinnerCategory.setSelection(i);
+                break;
             }
         }
+
+        // Date selection
+        final Calendar calendar = Calendar.getInstance();
+        if (bill.getDueDate() != null) {
+            calendar.setTime(bill.getDueDate());
+        }
+        final Date[] selectedDate = {calendar.getTime()};
+
+        // Format and show the date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+        tvSelectedDate.setText(dateFormat.format(selectedDate[0]));
+
+        btnPickDate.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    MainActivity.this,
+                    (view1, year, month, dayOfMonth) -> {
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, month);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        selectedDate[0] = calendar.getTime();
+                        tvSelectedDate.setText(dateFormat.format(selectedDate[0]));
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH)
+            );
+            datePickerDialog.show();
+        });
+
+        // Add option to delete
+        builder.setNeutralButton("Delete", (dialog, which) -> {
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Confirm Delete")
+                    .setMessage("Are you sure you want to delete this bill?")
+                    .setPositiveButton("Yes", (dialogInterface, i) -> {
+                        // Delete from Firebase
+                        databaseRef.child("Groups").child(familyCode).child("bills").child(bill.getId())
+                                .removeValue()
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(MainActivity.this, "Bill deleted", Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnFailureListener(e -> {
+                                    Toast.makeText(MainActivity.this, "Failed to delete bill",
+                                            Toast.LENGTH_SHORT).show();
+                                });
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        });
+
+        // Setup dialog buttons
+        builder.setPositiveButton("Save", null); // We'll set this later to prevent auto-dismiss
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Override the positive button to validate input
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String name = etBillName.getText().toString().trim();
+            String amountStr = etBillAmount.getText().toString().trim();
+            String category = spinnerCategory.getSelectedItem().toString();
+            boolean isPaid = checkboxPaid.isChecked();
+
+            // Validate input
+            if (name.isEmpty()) {
+                etBillName.setError("Please enter a name");
+                return;
+            }
+
+            if (amountStr.isEmpty()) {
+                etBillAmount.setError("Please enter an amount");
+                return;
+            }
+
+            double amount;
+            try {
+                amount = Double.parseDouble(amountStr);
+                if (amount <= 0) {
+                    etBillAmount.setError("Amount must be greater than 0");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                etBillAmount.setError("Invalid amount");
+                return;
+            }
+
+            // Update bill
+            Bill updatedBill = new Bill(
+                    bill.getId(),
+                    name,
+                    amount,
+                    selectedDate[0],
+                    isPaid,
+                    category,
+                    bill.getCreatedBy() // preserve the original creator
+            );
+
+            // Save to Firebase
+            databaseRef.child("Groups").child(familyCode).child("bills").child(bill.getId())
+                    .setValue(updatedBill)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(MainActivity.this, "Bill updated successfully", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(MainActivity.this, "Failed to update bill: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    });
+        });
     }
 
     private void loadFinancialGoals() {
@@ -613,16 +901,4 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Helper classes for data models
-
-    private static class Bill {
-        String name;
-        double amount;
-        Date dueDate;
-
-        Bill(String name, double amount, Date dueDate) {
-            this.name = name;
-            this.amount = amount;
-            this.dueDate = dueDate;
-        }
-    }
 }
