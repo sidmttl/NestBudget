@@ -40,6 +40,10 @@ public class MainActivity extends AppCompatActivity {
     private String userId;  // User ID from SharedPreferences
     private TextView budgetTextView, incomeTextView;  // TextViews to display budget and income
 
+    private TextView expensesTextView;
+    private String familyCode;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawer_layout);
         ImageView menuIcon = findViewById(R.id.menu_icon);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        expensesTextView = findViewById(R.id.expensesTextView); // Use the correct ID from your XML
+
 
         // Handle navigation drawer clicks
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -110,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                     if (snapshot.exists()) {
                         String budget = snapshot.child("monthlyBudget").getValue(String.class);
                         String income = snapshot.child("monthlyIncome").getValue(String.class);
+                        familyCode = snapshot.child("familyCode").getValue(String.class); // Fetch familyCode
 
                         // Update UI with the budget and income
                         budgetTextView = findViewById(R.id.budgetTextView);
@@ -117,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
 
                         if (budget != null) budgetTextView.setText("Budget: " + budget);
                         if (income != null) incomeTextView.setText("Income: " + income);
+
+                        fetchTotalExpenses();
                     }
                 }
 
@@ -127,6 +136,37 @@ public class MainActivity extends AppCompatActivity {
             });
         }
     }
+
+    private void fetchTotalExpenses() {
+        if (familyCode == null) return;
+
+        database.child("Groups").child(familyCode).child("transactions")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        float totalExpenses = 0f;
+
+                        for (DataSnapshot item : snapshot.getChildren()) {
+                            Transaction transaction = item.getValue(Transaction.class);
+                            if (transaction != null) {
+                                try {
+                                    float amount = Float.parseFloat(transaction.getTransactionAmount());
+                                    totalExpenses += amount;
+                                } catch (NumberFormatException ignored) {}
+                            }
+                        }
+
+                        String expenseText = String.format("Expenses: $%.2f Spent", totalExpenses);
+                        expensesTextView.setText(expenseText);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        Toast.makeText(MainActivity.this, "Failed to fetch expenses", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
 
     private void setupPieChart() {
         List<PieEntry> entries = new ArrayList<>();

@@ -123,6 +123,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
+                    android:id="@+id/expensesTextView"
                     android:text="Expenses: $750 Spent"
                     android:gravity="start"
                     android:textSize="12sp"
