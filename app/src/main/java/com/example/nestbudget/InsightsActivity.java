@@ -3,6 +3,7 @@ package com.example.nestbudget;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -145,6 +146,11 @@ public class InsightsActivity extends AppCompatActivity {
         });
         dataSet.setValueTextSize(12f);
         pieChart.setData(data);
+
+        TypedValue typedValue = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.colorPrimary, typedValue, true);
+        int colorPrimary = typedValue.data;
+        pieChart.getLegend().setTextColor(colorPrimary);
 
         pieChart.setDrawHoleEnabled(true);
         pieChart.setHoleRadius(40f);
