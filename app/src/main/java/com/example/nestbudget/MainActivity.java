@@ -204,34 +204,59 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadAccountsOverview() {
-        // For demo purposes, we'll use hardcoded values
-        // In a real app, this data would come from Firebase
+        // Get accounts data from Firebase
+        databaseRef.child("Groups").child(familyCode).child("accounts")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        double cashAmount = 0;
+                        double savingsAmount = 0;
+                        double creditCardTotal = 0;
+                        double investmentsAmount = 0;
 
-        // You could replace this with actual data from Firebase like:
-        /*
-        databaseRef.child("Groups").child(familyCode).child("accounts").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                // Parse account data and update UI
-            }
+                        // Calculate totals for each account type
+                        for (DataSnapshot accountSnapshot : snapshot.getChildren()) {
+                            Account account = accountSnapshot.getValue(Account.class);
+                            if (account != null) {
+                                switch (account.getType()) {
+                                    case "Cash":
+                                        cashAmount += account.getBalance();
+                                        break;
+                                    case "Savings":
+                                        savingsAmount += account.getBalance();
+                                        break;
+                                    case "Credit Card":
+                                        creditCardTotal += account.getBalance();
+                                        break;
+                                    case "Investment":
+                                        investmentsAmount += account.getBalance();
+                                        break;
+                                }
+                            }
+                        }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, "Failed to load account data", Toast.LENGTH_SHORT).show();
-            }
+                        // Calculate total balance (subtract credit card debt)
+                        double totalBalance = cashAmount + savingsAmount - creditCardTotal + investmentsAmount;
+
+                        // Update UI
+                        totalBalanceTextView.setText(String.format("$%.2f", totalBalance));
+                        cashAmountTextView.setText(String.format("$%.0f", cashAmount));
+                        savingsAmountTextView.setText(String.format("$%.0f", savingsAmount));
+                        investmentsAmountTextView.setText(String.format("$%.0f", investmentsAmount));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(MainActivity.this, "Failed to load account data", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        // Make accounts overview card clickable
+        View accountsCard = findViewById(R.id.accounts_overview_card);
+        accountsCard.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AccountsActivity.class);
+            startActivity(intent);
         });
-        */
-
-        // For now we'll use sample data
-        double cashAmount = 3200.00;
-        double savingsAmount = 5800.00;
-        double investmentsAmount = 3500.00;
-        double totalBalance = cashAmount + savingsAmount + investmentsAmount;
-
-        totalBalanceTextView.setText(String.format("$%.2f", totalBalance));
-        cashAmountTextView.setText(String.format("$%.0f", cashAmount));
-        savingsAmountTextView.setText(String.format("$%.0f", savingsAmount));
-        investmentsAmountTextView.setText(String.format("$%.0f", investmentsAmount));
     }
 
     private void loadBudgetData() {
