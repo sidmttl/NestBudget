@@ -124,7 +124,7 @@
 
                 <TextView
                     android:id="@+id/expensesTextView"
-                    android:text="Expenses: $750 Spent"
+                    android:text="Expenses: $0.00 Spent"
                     android:gravity="start"
                     android:textSize="12sp"
                     android:textColor="@android:color/holo_red_dark"

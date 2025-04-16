@@ -100,7 +100,10 @@ public class SignupActivity extends AppCompatActivity {
         databaseReference.child("Users").child(username).setValue(userMap).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 // Proceed to income/budget pop-up
-                showIncomeBudgetDialog(username);
+                // showIncomeBudgetDialog(username);
+                Intent intent = new Intent(SignupActivity.this, FamilyGroupActivity.class);
+                intent.putExtra("username", username);
+                startActivity(intent);
             } else {
                 Toast.makeText(SignupActivity.this, "Failed to save data!", Toast.LENGTH_SHORT).show();
             }
