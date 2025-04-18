@@ -1,5 +1,6 @@
 package com.example.nestbudget;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +25,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +49,7 @@ public class AccountsActivity extends AppCompatActivity {
     private String familyCode;
     private String userId;
     private DatabaseReference databaseRef;
+    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +63,7 @@ public class AccountsActivity extends AppCompatActivity {
 
         // Initialize Firebase
         databaseRef = FirebaseDatabase.getInstance().getReference();
+        storageRef = FirebaseStorage.getInstance().getReference("profile_pics");
 
         // Initialize UI Components
         recyclerView = findViewById(R.id.accounts_recycler_view);
@@ -82,6 +89,16 @@ public class AccountsActivity extends AppCompatActivity {
 
         // Set up back button
         backButton.setOnClickListener(v -> finish());
+
+        ImageView profileIcon = findViewById(R.id.accounts_profile_icon);
+        if (profileIcon != null) {
+            loadProfilePicture(profileIcon);
+
+            profileIcon.setOnClickListener(v -> {
+                Intent intent = new Intent(AccountsActivity.this, SetProfileActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void setupTabs() {
@@ -302,5 +319,22 @@ public class AccountsActivity extends AppCompatActivity {
                         });
             }
         });
+    }
+
+    private void loadProfilePicture(ImageView profileIcon) {
+        if (userId != null) {
+            StorageReference imageRef = storageRef.child(userId + ".jpg");
+
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                // Profile picture exists, load it using Glide
+                Glide.with(this)
+                        .load(uri)
+                        .circleCrop() // Make the image circular
+                        .into(profileIcon);
+            }).addOnFailureListener(e -> {
+                // Profile picture doesn't exist or error occurred, keep the default icon
+                // No action needed as the default icon is already set in the layout
+            });
+        }
     }
 }

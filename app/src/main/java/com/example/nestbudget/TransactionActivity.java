@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -14,6 +15,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -37,6 +42,7 @@ public class TransactionActivity extends AppCompatActivity {
     private String userID;
 
     private DatabaseReference databaseRef;
+    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +52,8 @@ public class TransactionActivity extends AppCompatActivity {
         LoginManager loginManager = new LoginManager(this);
         familyCode = loginManager.getFamilyCode();
         userID = loginManager.getLoggedInUser();
+
+        storageRef = FirebaseStorage.getInstance().getReference("profile_pics");
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
@@ -81,6 +89,18 @@ public class TransactionActivity extends AppCompatActivity {
         });
 
         fabAddTransaction.setOnClickListener(v -> showAddTransactionDialog());
+
+
+
+        ImageView profileIcon = findViewById(R.id.profile_icon);
+        if (profileIcon != null) {
+            loadProfilePicture(profileIcon);
+
+            profileIcon.setOnClickListener(v -> {
+                Intent intent = new Intent(TransactionActivity.this, SetProfileActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void setupBottomNavigation() {
@@ -154,5 +174,22 @@ public class TransactionActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
+    }
+
+    private void loadProfilePicture(ImageView profileIcon) {
+        if (this.userID != null) {
+            StorageReference imageRef = storageRef.child(userID + ".jpg");
+
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                // Profile picture exists, load it using Glide
+                Glide.with(this)
+                        .load(uri)
+                        .circleCrop() // Make the image circular
+                        .into(profileIcon);
+            }).addOnFailureListener(e -> {
+                // Profile picture doesn't exist or error occurred, keep the default icon
+                // No action needed as the default icon is already set in the layout
+            });
+        }
     }
 }

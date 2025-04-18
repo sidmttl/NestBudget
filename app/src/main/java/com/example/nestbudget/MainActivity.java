@@ -24,6 +24,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
@@ -31,6 +32,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -67,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout goalsContainer;
     private TextView addGoalButton;
 
+    private StorageReference storageRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize Firebase
         databaseRef = FirebaseDatabase.getInstance().getReference();
+        storageRef = FirebaseStorage.getInstance().getReference("profile_pics");
 
         // Initialize UI Components
         initializeUI();
@@ -142,6 +148,8 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, SetProfileActivity.class);
             startActivity(intent);
         });
+
+        loadProfilePicture(profileIcon);
 
         // Add goal button click
         addGoalButton.setOnClickListener(v -> {
@@ -925,5 +933,20 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Helper classes for data models
+    private void loadProfilePicture(ImageView profileIcon) {
+        if (userId != null) {
+            StorageReference imageRef = storageRef.child(userId + ".jpg");
+
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                // Profile picture exists, load it using Glide
+                Glide.with(this)
+                        .load(uri)
+                        .circleCrop() // Make the image circular
+                        .into(profileIcon);
+            }).addOnFailureListener(e -> {
+                // Profile picture doesn't exist or error occurred, keep the default icon
+                // No action needed as the default icon is already set in the layout
+            });
+        }
+    }
 }
