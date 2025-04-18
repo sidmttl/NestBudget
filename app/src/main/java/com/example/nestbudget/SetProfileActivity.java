@@ -24,6 +24,8 @@ public class SetProfileActivity extends AppCompatActivity {
     private Button uploadButton;
     private Uri selectedImageUri;
 
+    private String userID;
+
     private final StorageReference storageRef = FirebaseStorage.getInstance().getReference("profile_pics");
 
     ActivityResultLauncher<String> pickImageLauncher = registerForActivityResult(
@@ -43,11 +45,14 @@ public class SetProfileActivity extends AppCompatActivity {
         profileImageView = findViewById(R.id.profileImageView);
         uploadButton = findViewById(R.id.uploadButton);
 
+        LoginManager loginManager = new LoginManager(this);
+        userID = loginManager.getLoggedInUser();
+
         uploadButton.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
     }
 
     private void uploadImageToFirebase(Uri imageUri) {
-        String fileName = "user_profile_" + System.currentTimeMillis() + ".jpg";
+        String fileName = userID + ".jpg";
         StorageReference imageRef = storageRef.child(fileName);
 
         imageRef.putFile(imageUri)
