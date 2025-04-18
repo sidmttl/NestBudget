@@ -6,51 +6,49 @@
     android:padding="16dp">
 
     <EditText
-        android:id="@+id/etTransactionName"
+        android:id="@+id/et_account_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Transaction Name"
+        android:hint="Account Name"
         android:inputType="text"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="12dp" />
 
     <TextView
-        android:id="@+id/tvChooseCategory"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Transaction Category:"
+        android:text="Account Type:"
         android:textSize="16sp"
-        android:layout_marginBottom="8dp"
-        android:textColor="@android:color/black" />
+        android:layout_marginBottom="8dp" />
 
     <Spinner
-        android:id="@+id/SpinTransactionCategory"
+        android:id="@+id/spinner_account_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/transaction_categories"
-        android:spinnerMode="dropdown" />
+        android:layout_marginBottom="12dp" />
 
     <EditText
-        android:id="@+id/etTransactionAmount"
+        android:id="@+id/et_account_balance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Transaction Amount"
+        android:hint="Current Balance"
+        android:inputType="numberDecimal"
+        android:layout_marginBottom="12dp" />
+
+    <EditText
+        android:id="@+id/et_account_institution"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Financial Institution"
         android:inputType="text"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="12dp" />
 
     <EditText
-        android:id="@+id/etTransactionLocation"
+        android:id="@+id/et_account_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Transaction Location"
-        android:inputType="text"
-        android:layout_marginBottom="16dp" />
-
-    <EditText
-        android:id="@+id/etTransactionDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Date (e.g., MM/DD/YYYY)"
-        android:inputType="date"
-        android:layout_marginBottom="16dp" />
+        android:hint="Last 4 Digits (optional)"
+        android:inputType="number"
+        android:maxLength="4"
+        android:layout_marginBottom="12dp" />
 
 </LinearLayout>

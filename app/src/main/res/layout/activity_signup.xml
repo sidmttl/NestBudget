@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:background="@android:drawable/edit_text"
         android:hint="First Name"
-        android:inputType="textEmailAddress"
+        android:inputType="text"
         android:padding="12dp" />
 
     <EditText
@@ -35,7 +35,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:drawable/edit_text"
         android:hint="Last Name"
-        android:inputType="textEmailAddress"
+        android:inputType="text"
         android:padding="12dp" />
 
     <EditText
@@ -45,7 +45,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:drawable/edit_text"
         android:hint="Username"
-        android:inputType="textEmailAddress"
+        android:inputType="text"
         android:padding="12dp" />
 
     <EditText
@@ -65,7 +65,7 @@
         android:layout_marginTop="10dp"
         android:background="@android:drawable/edit_text"
         android:hint="Age"
-        android:inputType="textPassword"
+        android:inputType="text"
         android:padding="12dp" />
     <Button
         android:id="@+id/btnSignup"

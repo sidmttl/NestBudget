@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -86,15 +88,18 @@ public class TransactionActivity extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.menu_dashboard) {
-                startActivity(new Intent(TransactionActivity.this, MainActivity.class));
+                Intent intent = new Intent(TransactionActivity.this, MainActivity.class);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_transactions) {
                 return true;
             } else if (itemId == R.id.menu_insights) {
-                Toast.makeText(this, "Insights feature coming soon", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(TransactionActivity.this, InsightsActivity.class);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_journal) {
-                startActivity(new Intent(TransactionActivity.this, ToBuyListActivity.class));
+                Intent intent = new Intent(TransactionActivity.this, ToBuyListActivity.class);
+                startActivity(intent);
                 return true;
             }
             return false;
@@ -108,22 +113,30 @@ public class TransactionActivity extends AppCompatActivity {
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_add_transaction, null);
         EditText etTransactionName = view.findViewById(R.id.etTransactionName);
         EditText etTransactionAmount = view.findViewById(R.id.etTransactionAmount);
-        EditText etTransactionCategory = view.findViewById(R.id.etTransactionCategory);
+        Spinner spinnerTransactionCategory = view.findViewById(R.id.SpinTransactionCategory);
         EditText etTransactionLocation = view.findViewById(R.id.etTransactionLocation);
-        EditText etTransactionDate = view.findViewById(R.id.etTransactionDate); // Can use a DatePicker instead for better UX
+        EditText etTransactionDate = view.findViewById(R.id.etTransactionDate);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.transaction_categories,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerTransactionCategory.setAdapter(adapter);
 
         builder.setView(view);
 
         builder.setPositiveButton("Add", (dialog, which) -> {
             String name = etTransactionName.getText().toString().trim();
             String amount = etTransactionAmount.getText().toString().trim();
-            String category = etTransactionCategory.getText().toString().trim();
+            String category = spinnerTransactionCategory.getSelectedItem().toString(); // Get selected category
             String location = etTransactionLocation.getText().toString().trim();
             String date = etTransactionDate.getText().toString().trim();
 
             if (!name.isEmpty() && !amount.isEmpty() && !category.isEmpty() && !location.isEmpty() && !date.isEmpty()) {
                 String id = Long.toString(System.currentTimeMillis());
-                Transaction newTransaction = new Transaction(id, name, amount, category, location, date); // Pass amount as String
+                Transaction newTransaction = new Transaction(id, name, category, amount, location, date); // Pass amount as String
                 databaseRef.child("Groups").child(familyCode).child("transactions").child(id).setValue(newTransaction);
             } else {
                 Toast.makeText(TransactionActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
@@ -134,6 +147,7 @@ public class TransactionActivity extends AppCompatActivity {
 
         builder.show();
     }
+
 
 
     @Override

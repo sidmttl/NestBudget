@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/et_goal_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Goal Name"
+        android:inputType="text"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/et_goal_target"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Target Amount ($)"
+        android:inputType="numberDecimal"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/et_goal_current"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Current Amount ($)"
+        android:inputType="numberDecimal"
+        android:layout_marginBottom="16dp" />
+
+    <Spinner
+        android:id="@+id/spinner_goal_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"/>
+
+</LinearLayout>

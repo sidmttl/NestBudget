@@ -2,4 +2,14 @@
     <string name="app_name">NestBudget</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array name="transaction_categories">
+        <item>Food + Dining</item>
+        <item>Groceries</item>
+        <item>Medical</item>
+        <item>Bills</item>
+        <item>Travel</item>
+        <item>Entertainment</item>
+        <item>Other</item>
+    </string-array>
+    mbt
 </resources>
