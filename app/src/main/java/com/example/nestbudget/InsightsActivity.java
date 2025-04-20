@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +21,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import android.content.Intent;
+import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +44,9 @@ public class InsightsActivity extends AppCompatActivity {
 
     private Map<String, Integer> pieChartColors;
 
+    private StorageReference storageRef;
+    private String userId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +54,9 @@ public class InsightsActivity extends AppCompatActivity {
 
         LoginManager loginManager = new LoginManager(this);
         familyCode = loginManager.getFamilyCode();
+
+        userId = loginManager.getLoggedInUser();
+        storageRef = FirebaseStorage.getInstance().getReference("profile_pics");
 
         if (familyCode == null || familyCode.isEmpty()) {
             Toast.makeText(this, "Family code is not set.", Toast.LENGTH_SHORT).show();
@@ -60,6 +72,16 @@ public class InsightsActivity extends AppCompatActivity {
 
         setupBottomNavigation();
         fetchTransactions();
+
+        ImageView profileIcon = findViewById(R.id.profile_icon);
+        if (profileIcon != null) {
+            loadProfilePicture(profileIcon);
+
+            profileIcon.setOnClickListener(v -> {
+                Intent intent = new Intent(InsightsActivity.this, SetProfileActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void fetchTransactions() {
@@ -188,5 +210,22 @@ public class InsightsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         bottomNavigationView.setSelectedItemId(R.id.menu_insights);
+    }
+
+    private void loadProfilePicture(ImageView profileIcon) {
+        if (userId != null) {
+            StorageReference imageRef = storageRef.child(userId + ".jpg");
+
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                // Profile picture exists, load it using Glide
+                Glide.with(this)
+                        .load(uri)
+                        .circleCrop() // Make the image circular
+                        .into(profileIcon);
+            }).addOnFailureListener(e -> {
+                // Profile picture doesn't exist or error occurred, keep the default icon
+                // No action needed as the default icon is already set in the layout
+            });
+        }
     }
 }
