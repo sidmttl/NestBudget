@@ -130,13 +130,13 @@ public class TransactionActivity extends AppCompatActivity {
         builder.setPositiveButton("Add", (dialog, which) -> {
             String name = etTransactionName.getText().toString().trim();
             String amount = etTransactionAmount.getText().toString().trim();
-            String category = spinnerTransactionCategory.getSelectedItem().toString(); // Get selected category
+            String category = spinnerTransactionCategory.getSelectedItem().toString();
             String location = etTransactionLocation.getText().toString().trim();
             String date = etTransactionDate.getText().toString().trim();
 
             if (!name.isEmpty() && !amount.isEmpty() && !category.isEmpty() && !location.isEmpty() && !date.isEmpty()) {
                 String id = Long.toString(System.currentTimeMillis());
-                Transaction newTransaction = new Transaction(id, name, category, amount, location, date); // Pass amount as String
+                Transaction newTransaction = new Transaction(id, name, category, amount, location, date, userID);
                 databaseRef.child("Groups").child(familyCode).child("transactions").child(id).setValue(newTransaction);
             } else {
                 Toast.makeText(TransactionActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
@@ -148,11 +148,11 @@ public class TransactionActivity extends AppCompatActivity {
         builder.show();
     }
 
-
-
     @Override
     protected void onResume() {
         super.onResume();
         bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
     }
+
+
 }
