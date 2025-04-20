@@ -13,12 +13,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.bumptech.glide.Glide;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -41,8 +39,9 @@ public class TransactionActivity extends AppCompatActivity {
     private String familyCode;
     private String userID;
 
+    private DrawerLayout drawerLayout;
+
     private DatabaseReference databaseRef;
-    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +52,13 @@ public class TransactionActivity extends AppCompatActivity {
         familyCode = loginManager.getFamilyCode();
         userID = loginManager.getLoggedInUser();
 
-        storageRef = FirebaseStorage.getInstance().getReference("profile_pics");
-
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
         recyclerViewTransactions = findViewById(R.id.recyler_view);
         fabAddTransaction = findViewById(R.id.floatingActionButton2);
+        ImageView menuIcon = findViewById(R.id.menu_icon);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        menuIcon.setOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
@@ -89,18 +89,6 @@ public class TransactionActivity extends AppCompatActivity {
         });
 
         fabAddTransaction.setOnClickListener(v -> showAddTransactionDialog());
-
-
-
-        ImageView profileIcon = findViewById(R.id.profile_icon);
-        if (profileIcon != null) {
-            loadProfilePicture(profileIcon);
-
-            profileIcon.setOnClickListener(v -> {
-                Intent intent = new Intent(TransactionActivity.this, SetProfileActivity.class);
-                startActivity(intent);
-            });
-        }
     }
 
     private void setupBottomNavigation() {
@@ -150,13 +138,13 @@ public class TransactionActivity extends AppCompatActivity {
         builder.setPositiveButton("Add", (dialog, which) -> {
             String name = etTransactionName.getText().toString().trim();
             String amount = etTransactionAmount.getText().toString().trim();
-            String category = spinnerTransactionCategory.getSelectedItem().toString(); // Get selected category
+            String category = spinnerTransactionCategory.getSelectedItem().toString();
             String location = etTransactionLocation.getText().toString().trim();
             String date = etTransactionDate.getText().toString().trim();
 
             if (!name.isEmpty() && !amount.isEmpty() && !category.isEmpty() && !location.isEmpty() && !date.isEmpty()) {
                 String id = Long.toString(System.currentTimeMillis());
-                Transaction newTransaction = new Transaction(id, name, category, amount, location, date); // Pass amount as String
+                Transaction newTransaction = new Transaction(id, name, category, amount, location, date, userID);
                 databaseRef.child("Groups").child(familyCode).child("transactions").child(id).setValue(newTransaction);
             } else {
                 Toast.makeText(TransactionActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
@@ -166,8 +154,9 @@ public class TransactionActivity extends AppCompatActivity {
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         builder.show();
-    }
 
+
+    }
 
 
     @Override
@@ -176,20 +165,5 @@ public class TransactionActivity extends AppCompatActivity {
         bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
     }
 
-    private void loadProfilePicture(ImageView profileIcon) {
-        if (this.userID != null) {
-            StorageReference imageRef = storageRef.child(userID + ".jpg");
 
-            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                // Profile picture exists, load it using Glide
-                Glide.with(this)
-                        .load(uri)
-                        .circleCrop() // Make the image circular
-                        .into(profileIcon);
-            }).addOnFailureListener(e -> {
-                // Profile picture doesn't exist or error occurred, keep the default icon
-                // No action needed as the default icon is already set in the layout
-            });
-        }
-    }
 }
