@@ -114,8 +114,8 @@ public class ToBuyListActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
-                // For now, just show a toast
-                Toast.makeText(this, "Insights feature coming soon", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(ToBuyListActivity.this, InsightsActivity.class);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_journal) {
                 // Already on journal, no action needed
