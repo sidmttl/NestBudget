@@ -6,12 +6,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,6 +39,8 @@ public class TransactionActivity extends AppCompatActivity {
     private String familyCode;
     private String userID;
 
+    private DrawerLayout drawerLayout;
+
     private DatabaseReference databaseRef;
 
     @Override
@@ -51,6 +56,9 @@ public class TransactionActivity extends AppCompatActivity {
 
         recyclerViewTransactions = findViewById(R.id.recyler_view);
         fabAddTransaction = findViewById(R.id.floatingActionButton2);
+        ImageView menuIcon = findViewById(R.id.menu_icon);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        menuIcon.setOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
@@ -146,7 +154,10 @@ public class TransactionActivity extends AppCompatActivity {
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         builder.show();
+
+
     }
+
 
     @Override
     protected void onResume() {

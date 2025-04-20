@@ -25,13 +25,6 @@
             android:gravity="center_vertical"
             android:padding="8dp">
 
-            <ImageView
-                android:id="@+id/menu_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_menu" />
-
             <TextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="0dp"
@@ -43,19 +36,6 @@
                 android:textStyle="bold"
                 android:gravity="center" />
 
-            <ImageView
-                android:id="@+id/profile_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="5dp"
-                android:src="@drawable/ic_profile" />
-
-            <ImageView
-                android:id="@+id/notification_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_notifications" />
         </LinearLayout>
 
     </androidx.appcompat.widget.Toolbar>
