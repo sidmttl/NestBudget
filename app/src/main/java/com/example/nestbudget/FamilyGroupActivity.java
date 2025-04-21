@@ -52,6 +52,7 @@ public class FamilyGroupActivity extends AppCompatActivity {
     private void showJoinFamilyScreen() {
         // Navigate to a screen where the user can enter the family code
         Intent intent = new Intent(FamilyGroupActivity.this, JoinFamilyActivity.class);
+        intent.putExtra("username", username);
         startActivity(intent);
     }
 }
