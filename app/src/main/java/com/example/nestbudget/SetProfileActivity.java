@@ -393,6 +393,9 @@ public class SetProfileActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
+        Intent intent = new Intent(SetProfileActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
         return true;
     }
@@ -400,6 +403,9 @@ public class SetProfileActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        Intent intent = new Intent(SetProfileActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
     }
 }
