@@ -56,9 +56,6 @@ public class TransactionActivity extends AppCompatActivity {
 
         recyclerViewTransactions = findViewById(R.id.recyler_view);
         fabAddTransaction = findViewById(R.id.floatingActionButton2);
-        ImageView menuIcon = findViewById(R.id.menu_icon);
-        drawerLayout = findViewById(R.id.drawer_layout);
-        menuIcon.setOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
