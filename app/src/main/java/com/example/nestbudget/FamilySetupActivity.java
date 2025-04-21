@@ -64,7 +64,9 @@ public class FamilySetupActivity extends AppCompatActivity {
         databaseReference.child("Users").child(username).child("hasDebt").setValue(hasDebt);
 
         Toast.makeText(this, "Family setup successful!", Toast.LENGTH_SHORT).show();
-        startActivity(new Intent(FamilySetupActivity.this, MainActivity.class));
+        Intent intent = new Intent(FamilySetupActivity.this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
     }
 
