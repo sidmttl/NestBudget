@@ -190,14 +190,17 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_transactions) {
                 Intent intent = new Intent(MainActivity.this, TransactionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
                 Intent intent = new Intent(MainActivity.this, InsightsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_journal) {
                 Intent intent = new Intent(MainActivity.this, ToBuyListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 return true;
             }

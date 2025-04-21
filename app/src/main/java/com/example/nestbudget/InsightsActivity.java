@@ -189,16 +189,19 @@ public class InsightsActivity extends AppCompatActivity {
 
             if (itemId == R.id.menu_dashboard) {
                 Intent intent = new Intent(InsightsActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_transactions) {
                 Intent intent = new Intent(InsightsActivity.this, TransactionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
                 return true;
             } else if (itemId == R.id.menu_journal) {
                 Intent intent = new Intent(InsightsActivity.this, ToBuyListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(intent);
                 return true;
             }
