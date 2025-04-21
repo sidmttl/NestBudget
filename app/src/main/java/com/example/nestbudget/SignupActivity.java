@@ -81,19 +81,22 @@ public class SignupActivity extends AppCompatActivity {
                 Toast.makeText(SignupActivity.this, "Username already taken. Choose another one.", Toast.LENGTH_SHORT).show();
             } else {
                 saveUserToDatabase(username, firstName, lastName, password, age);
+//                Intent intent = new Intent(SignupActivity.this, FamilyGroupActivity.class);
+//                intent.putExtra("username", username);
+//                startActivity(intent);
             }
         });
     }
 
     private void saveUserToDatabase(String username, String firstName, String lastName, String password, String age) {
-        String ownCode = generateRandomCode();
+//        String ownCode = generateRandomCode();
 
         HashMap<String, String> userMap = new HashMap<>();
         userMap.put("firstName", firstName);
         userMap.put("lastName", lastName);
         userMap.put("password", password);
         userMap.put("age", age);
-        userMap.put("familyCode", ownCode);
+//        userMap.put("familyCode", ownCode);
 
         savedUsername = username;
 
@@ -109,7 +112,7 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
-        databaseReference.child("Groups").child(ownCode).child("members").child(username).setValue(true);
+//        databaseReference.child("Groups").child(ownCode).child("members").child(username).setValue(true);
     }
 
     private String generateRandomCode() {
