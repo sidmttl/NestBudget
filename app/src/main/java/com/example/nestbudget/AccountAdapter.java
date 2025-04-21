@@ -25,6 +25,7 @@ import java.util.Locale;
 
 public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.AccountViewHolder> {
     private List<Account> accounts;
+    private List<Account> filteredAccounts;
     private Context context;
     private String familyCode;
     private DatabaseReference databaseRef;
@@ -33,6 +34,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.AccountV
     public AccountAdapter(Context context, List<Account> accounts, String familyCode) {
         this.context = context;
         this.accounts = accounts;
+        this.filteredAccounts = new ArrayList<>(accounts); // Create a copy for filtering
         this.familyCode = familyCode;
         this.databaseRef = FirebaseDatabase.getInstance().getReference();
         this.filterType = null; // No filter initially
@@ -65,18 +67,7 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.AccountV
 
     @Override
     public void onBindViewHolder(AccountViewHolder holder, int position) {
-        // Filter accounts based on the selected type
-        List<Account> filteredAccounts = accounts;
-        if (filterType != null && !filterType.equals("All")) {
-            filteredAccounts = new ArrayList<>();
-            for (Account account : accounts) {
-                if (account.getType().equals(filterType)) {
-                    filteredAccounts.add(account);
-                }
-            }
-        }
-
-        if (position >= filteredAccounts.size()) {
+        if (position < 0 || position >= filteredAccounts.size()) {
             return;
         }
 
@@ -133,26 +124,38 @@ public class AccountAdapter extends RecyclerView.Adapter<AccountAdapter.AccountV
 
     @Override
     public int getItemCount() {
-        if (accounts == null) return 0;
-
-        // If there's a filter type, only count accounts of that type
-        if (filterType != null && !filterType.equals("All")) {
-            int count = 0;
-            for (Account account : accounts) {
-                if (account.getType().equals(filterType)) {
-                    count++;
-                }
-            }
-            return count;
-        }
-
-        return accounts.size();
+        return filteredAccounts.size();
     }
 
     // Method to update the filter type
     public void setFilterType(String filterType) {
         this.filterType = filterType;
+        filterAccounts();
         notifyDataSetChanged();
+    }
+
+    // Method to update accounts list with new data
+    public void updateAccounts(List<Account> newAccounts) {
+        this.accounts = new ArrayList<>(newAccounts);
+        filterAccounts();
+        notifyDataSetChanged();
+    }
+
+    // Method to filter accounts based on the current filterType
+    private void filterAccounts() {
+        filteredAccounts.clear();
+
+        if (filterType == null || filterType.equals("All")) {
+            // If no filter or "All" filter, include all accounts
+            filteredAccounts.addAll(accounts);
+        } else {
+            // Otherwise, only include accounts of the specified type
+            for (Account account : accounts) {
+                if (account.getType().equals(filterType)) {
+                    filteredAccounts.add(account);
+                }
+            }
+        }
     }
 
     private void showEditAccountDialog(Account account) {

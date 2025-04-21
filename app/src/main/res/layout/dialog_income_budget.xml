@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/etIncome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Monthly Income"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etBudget"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Monthly Budget"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etSavingsGoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Savings Goal"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etInvestmentsCurrent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Investments Current"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/etInvestmentsGoal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Investments Goal"
+            android:inputType="numberDecimal" />
+
+        <ToggleButton
+            android:id="@+id/toggleDebt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textOn="Has Debt"
+            android:textOff="No Debt" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel" />
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

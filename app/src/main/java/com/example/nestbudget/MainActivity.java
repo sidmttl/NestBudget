@@ -2,10 +2,15 @@ package com.example.nestbudget;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -35,6 +40,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -52,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference databaseRef;
     private String familyCode;
     private String userId;
+    private static final String TAG = "MainActivity";
 
     // UI Elements
     private TextView currentDateTextView;
@@ -70,6 +77,17 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout goalsContainer;
     private TextView addGoalButton;
 
+
+    // Dynamic budget and expense tracking variables
+    private String userBudget;
+    private String userIncome;
+    private double totalExpenses = 0;
+
+    // UI Elements for savings section
+    private TextView savingsTotalTextView;
+    private TextView incomeTotalTextView;
+    private ProgressBar savingsProgressBar;
+    private TextView savingsWarningText;
     private StorageReference storageRef;
 
     @Override
@@ -95,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Load data
         loadCurrentDate();
+        loadUserBudgetAndIncome();
         loadAccountsOverview();
         loadBudgetData();
         loadUpcomingBills();
@@ -122,6 +141,24 @@ public class MainActivity extends AppCompatActivity {
         budgetSpentTextView = findViewById(R.id.budget_spent);
         budgetTotalTextView = findViewById(R.id.budget_total);
         budgetProgressBar = findViewById(R.id.budgetBar);
+
+        // Find the budget warning text if it exists
+        TextView budgetWarningText = findViewById(R.id.budget_warning_text);
+        if (budgetWarningText != null) {
+            // Initially hide the warning
+            budgetWarningText.setVisibility(View.GONE);
+        }
+
+        // Savings section
+        savingsTotalTextView = findViewById(R.id.savings_amount_text);
+        incomeTotalTextView = findViewById(R.id.income_total);
+        savingsProgressBar = findViewById(R.id.savingsBar);
+        savingsWarningText = findViewById(R.id.savings_warning_text);
+
+        // Initially hide the savings warning
+        if (savingsWarningText != null) {
+            savingsWarningText.setVisibility(View.GONE);
+        }
 
         // Upcoming bills
         upcomingBillsContainer = findViewById(R.id.upcoming_bills_container);
@@ -167,7 +204,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.nav_settings) {
-                Toast.makeText(this, "Settings coming soon!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.nav_logout) {
                 LoginManager loginManager = new LoginManager(MainActivity.this);
@@ -190,14 +228,17 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_transactions) {
                 Intent intent = new Intent(MainActivity.this, TransactionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
                 Intent intent = new Intent(MainActivity.this, InsightsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_journal) {
                 Intent intent = new Intent(MainActivity.this, ToBuyListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             }
@@ -209,6 +250,266 @@ public class MainActivity extends AppCompatActivity {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault());
         String currentDate = dateFormat.format(new Date());
         currentDateTextView.setText(currentDate);
+    }
+
+    private void loadUserBudgetAndIncome() {
+        if (userId != null) {
+            databaseRef.child("Users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        userBudget = snapshot.child("monthlyBudget").getValue(String.class);
+                        userIncome = snapshot.child("monthlyIncome").getValue(String.class);
+
+                        Log.d(TAG, "Loaded user budget: " + userBudget + ", income: " + userIncome);
+
+                        // Now load expenses once we have the budget and income
+                        loadExpensesAndUpdateBudget();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "Failed to load user budget/income data: " + error.getMessage());
+                }
+            });
+        }
+    }
+
+    private void loadExpensesAndUpdateBudget() {
+        if (familyCode == null) return;
+
+        databaseRef.child("Groups").child(familyCode).child("transactions")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        totalExpenses = 0;
+
+                        // Log the count of transactions found
+                        Log.d(TAG, "Found " + snapshot.getChildrenCount() + " transactions");
+
+                        for (DataSnapshot transactionSnapshot : snapshot.getChildren()) {
+                            Transaction transaction = transactionSnapshot.getValue(Transaction.class);
+                            if (transaction != null) {
+                                String amountStr = transaction.getTransactionAmount();
+                                if (amountStr != null && !amountStr.isEmpty()) {
+                                    try {
+                                        // Clean the amount string (remove any currency symbols or commas)
+                                        amountStr = amountStr.replaceAll("[^\\d.]", "");
+                                        double amount = Double.parseDouble(amountStr);
+                                        totalExpenses += amount;
+                                        Log.d(TAG, "Added transaction amount: " + amount + ", running total: " + totalExpenses);
+                                    } catch (NumberFormatException e) {
+                                        Log.e(TAG, "Invalid transaction amount '" + amountStr + "': " + e.getMessage());
+                                    }
+                                }
+                            }
+                        }
+
+                        // Log the final total for debugging
+                        Log.d(TAG, "Final total expenses: " + totalExpenses);
+
+                        // Update the budget UI with real data
+                        updateBudgetUI();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e(TAG, "Failed to load expenses: " + error.getMessage());
+                    }
+                });
+    }
+
+    private void updateBudgetUI() {
+        double budget = 1000.00; // Default value
+
+        // Try to parse the actual budget from user data
+        if (userBudget != null && !userBudget.isEmpty()) {
+            try {
+                // Clean the budget string in case it has currency symbols
+                String cleanBudget = userBudget.replaceAll("[^\\d.]", "");
+                budget = Double.parseDouble(cleanBudget);
+                Log.d(TAG, "Parsed budget value: " + budget);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Invalid budget format: " + e.getMessage());
+            }
+        }
+
+        // Calculate remaining budget
+        double remainingBudget = budget - totalExpenses;
+        Log.d(TAG, "Budget: " + budget + ", Expenses: " + totalExpenses + ", Remaining: " + remainingBudget);
+
+        // Calculate percentage of budget spent
+        int percentSpent = 0;
+        if (budget > 0) {
+            percentSpent = (int)((totalExpenses / budget) * 100);
+            percentSpent = Math.min(percentSpent, 100); // Cap at 100% for display purposes
+        }
+
+        // Update Budget UI
+        budgetSpentTextView.setText(String.format("$%.0f Spent", totalExpenses));
+        budgetTotalTextView.setText(String.format("of $%.0f", budget));
+
+        // Set up budget progress bar - the progress represents amount spent
+        budgetProgressBar.setMax(100); // Use percentage
+        budgetProgressBar.setProgress(percentSpent);
+        Log.d(TAG, "Progress bar set to " + percentSpent + "% of budget");
+
+        // Find the budget warning text
+        TextView budgetWarningText = findViewById(R.id.budget_warning_text);
+
+        // Change progress bar color based on percentage and show/hide warning
+        if (totalExpenses > budget) {
+            // Red progress bar for budget exceeded
+            budgetProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.holo_red_light)));
+
+            // Show warning message if we have the TextView
+            if (budgetWarningText != null) {
+                budgetWarningText.setText("Expenses surpassed budget limit!");
+                budgetWarningText.setVisibility(View.VISIBLE);
+            }
+
+            // Red text for the spent amount
+            budgetSpentTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+        } else if (percentSpent >= 75) {
+            // Orange progress bar for high usage
+            budgetProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.holo_orange_light)));
+
+            // Show warning message if we have the TextView
+            if (budgetWarningText != null) {
+                budgetWarningText.setText("Nearing budget limit!");
+                budgetWarningText.setVisibility(View.VISIBLE);
+            }
+
+            // Orange text for the spent amount
+            budgetSpentTextView.setTextColor(getResources().getColor(android.R.color.holo_orange_dark));
+        } else {
+            // Green progress bar for normal usage
+            budgetProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.holo_green_light)));
+
+            // Hide warning message if we have the TextView
+            if (budgetWarningText != null) {
+                budgetWarningText.setVisibility(View.GONE);
+            }
+
+            // Green text for the spent amount when under budget
+            budgetSpentTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+        }
+
+        // Now update the savings UI
+        updateSavingsUI();
+    }
+
+    private void updateSavingsUI() {
+        Log.d(TAG, "updateSavingsUI called");
+
+        double income = 3000.00; // Default value
+
+        // Try to parse the actual income from user data
+        if (userIncome != null && !userIncome.isEmpty()) {
+            try {
+                // Clean the income string in case it has currency symbols
+                String cleanIncome = userIncome.replaceAll("[^\\d.]", "");
+                income = Double.parseDouble(cleanIncome);
+                Log.d(TAG, "Parsed income value: " + income);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Invalid income format: " + e.getMessage());
+            }
+        }
+
+        // Calculate savings (Income - Expenses)
+        double savings = income - totalExpenses;
+
+        // Don't show negative savings
+        if (savings < 0) {
+            savings = 0;
+        }
+
+        // Calculate savings percentage
+        int percentSaved = 0;
+        if (income > 0) {
+            percentSaved = (int)((savings / income) * 100);
+            Log.d(TAG, "Savings: " + savings + ", Income: " + income + ", Percent saved: " + percentSaved + "%");
+        }
+
+        if (savingsTotalTextView == null) {
+            Log.e(TAG, "savingsTotalTextView is null!");
+        }
+        if (incomeTotalTextView == null) {
+            Log.e(TAG, "incomeTotalTextView is null!");
+        }
+        if (savingsProgressBar == null) {
+            Log.e(TAG, "savingsProgressBar is null!");
+        }
+
+        // Update Savings UI
+        if (savingsTotalTextView != null && incomeTotalTextView != null) {
+            // Check if savings is zero
+            if (savings <= 0) {
+                savingsTotalTextView.setText("No Savings");
+                savingsTotalTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+            } else {
+                savingsTotalTextView.setText(String.format("$%.0f Saved", savings));
+            }
+
+            incomeTotalTextView.setText(String.format("of $%.0f", income));
+
+            // Set up savings progress bar
+            if (savingsProgressBar != null) {
+                savingsProgressBar.setMax(100);
+                savingsProgressBar.setProgress(percentSaved);
+
+                // Change progress bar color based on percentage and show/hide warning
+                if (savings <= 0) {
+                    // No savings - use red
+                    savingsProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.holo_red_light)));
+
+                    // Show warning message
+                    if (savingsWarningText != null) {
+                        savingsWarningText.setText("No savings this month!");
+                        savingsWarningText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                        savingsWarningText.setVisibility(View.VISIBLE);
+                    }
+                } else if (percentSaved >= 75) {
+                    // Good savings - use green
+                    savingsProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.holo_green_light)));
+
+                    // Show positive message
+                    if (savingsWarningText != null) {
+                        savingsWarningText.setText("Excellent savings rate!");
+                        savingsWarningText.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                        savingsWarningText.setVisibility(View.VISIBLE);
+                    }
+
+                    // Green text for the savings amount
+                    savingsTotalTextView.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                } else if (percentSaved >= 25) {
+                    // Moderate savings - use yellow
+                    savingsProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.holo_orange_light)));
+
+                    // Hide warning message
+                    if (savingsWarningText != null) {
+                        savingsWarningText.setVisibility(View.GONE);
+                    }
+
+                    // Blue text for the savings amount
+                    savingsTotalTextView.setTextColor(getResources().getColor(android.R.color.holo_blue_dark));
+                } else {
+                    // Low savings - use red
+                    savingsProgressBar.setProgressTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.holo_red_light)));
+
+                    // Show warning message
+                    if (savingsWarningText != null) {
+                        savingsWarningText.setText("Low savings rate!");
+                        savingsWarningText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                        savingsWarningText.setVisibility(View.VISIBLE);
+                    }
+
+                    // Red text for the savings amount
+                    savingsTotalTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                }
+            }
+        }
     }
 
     private void loadAccountsOverview() {
@@ -268,18 +569,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadBudgetData() {
-        // For demo purposes, we'll use sample data
+        // Initial placeholder values, will be updated by loadExpensesAndUpdateBudget
         double budgetTotal = 1000.00;
-        double budgetSpent = 750.00;
-        double budgetRemaining = budgetTotal - budgetSpent;
+        double budgetSpent = 0.00;
 
-        // Update Budget UI
+        // Update Budget UI with placeholder values until real data is loaded
         budgetSpentTextView.setText(String.format("$%.0f Spent", budgetSpent));
         budgetTotalTextView.setText(String.format("of $%.0f", budgetTotal));
 
-        // Set up budget progress bar - the progress represents amount spent
-        budgetProgressBar.setMax((int)budgetTotal);
-        budgetProgressBar.setProgress((int)budgetSpent);
+        // Set up budget progress bar with percentage
+        budgetProgressBar.setMax(100);
+        budgetProgressBar.setProgress(0);
+
+        // Make sure we update with real data as soon as possible
+        loadUserBudgetAndIncome();
     }
 
     private void loadUpcomingBills() {
@@ -933,6 +1236,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        bottomNavigationView.setSelectedItemId(R.id.menu_dashboard);
+    }
+
+  
     private void loadProfilePicture(ImageView profileIcon) {
         if (userId != null) {
             StorageReference imageRef = storageRef.child(userId + ".jpg");
