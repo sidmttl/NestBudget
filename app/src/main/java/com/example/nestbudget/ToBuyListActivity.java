@@ -107,17 +107,17 @@ public class ToBuyListActivity extends AppCompatActivity {
             if (itemId == R.id.menu_dashboard) {
                 // Navigate to Dashboard/MainActivity
                 Intent intent = new Intent(ToBuyListActivity.this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_transactions) {
                 Intent intent = new Intent(ToBuyListActivity.this, TransactionActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
                 Intent intent = new Intent(ToBuyListActivity.this, InsightsActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_journal) {
