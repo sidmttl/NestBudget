@@ -72,16 +72,6 @@ public class InsightsActivity extends AppCompatActivity {
 
         setupBottomNavigation();
         fetchTransactions();
-
-        ImageView profileIcon = findViewById(R.id.profile_icon);
-        if (profileIcon != null) {
-            loadProfilePicture(profileIcon);
-
-            profileIcon.setOnClickListener(v -> {
-                Intent intent = new Intent(InsightsActivity.this, SetProfileActivity.class);
-                startActivity(intent);
-            });
-        }
     }
 
     private void fetchTransactions() {

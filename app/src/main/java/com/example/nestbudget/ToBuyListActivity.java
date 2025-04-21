@@ -88,16 +88,6 @@ public class ToBuyListActivity extends AppCompatActivity {
         });
 
         fabAddItem.setOnClickListener(v -> showAddItemDialog());
-
-        ImageView profileIcon = findViewById(R.id.profile_icon);
-        if (profileIcon != null) {
-            loadProfilePicture(profileIcon);
-
-            profileIcon.setOnClickListener(v -> {
-                Intent intent = new Intent(ToBuyListActivity.this, SetProfileActivity.class);
-                startActivity(intent);
-            });
-        }
     }
 
     private void setupBottomNavigation() {
@@ -146,7 +136,7 @@ public class ToBuyListActivity extends AppCompatActivity {
 
             if (!itemTitle.isEmpty()) {
                 String id = Long.toString(System.currentTimeMillis());
-                ToBuyList newItem = new ToBuyList(userID, itemTitle, itemContent);
+                ToBuyList newItem = new ToBuyList(id, itemTitle, itemContent);
                 databaseRef.child("Groups").child(familyCode).child("journal").child(id).setValue(newItem);
                 // The ValueEventListener will update the UI
             } else {
