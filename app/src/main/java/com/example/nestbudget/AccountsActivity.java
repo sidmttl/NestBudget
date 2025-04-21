@@ -97,6 +97,11 @@ public class AccountsActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 String selectedType = tab.getText().toString();
+                // Extract the type without the count if it exists
+                if (selectedType.contains(" (")) {
+                    selectedType = selectedType.substring(0, selectedType.indexOf(" ("));
+                }
+
                 if (selectedType.equals("All")) {
                     adapter.setFilterType(null);
                 } else {
@@ -111,7 +116,8 @@ public class AccountsActivity extends AppCompatActivity {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                // Not needed
+                // When a tab is reselected, refresh the same filter
+                onTabSelected(tab);
             }
         });
     }
@@ -127,7 +133,7 @@ public class AccountsActivity extends AppCompatActivity {
                         // Check if accounts exist
                         if (!snapshot.exists()) {
                             updateBalanceSummary();
-                            adapter.notifyDataSetChanged();
+                            adapter.updateAccounts(accountList);
                             return;
                         }
 
@@ -142,8 +148,8 @@ public class AccountsActivity extends AppCompatActivity {
                         // Update the total balance display
                         updateBalanceSummary();
 
-                        // Notify the adapter
-                        adapter.notifyDataSetChanged();
+                        // Update the adapter with the new accounts list
+                        adapter.updateAccounts(accountList);
                     }
 
                     @Override
