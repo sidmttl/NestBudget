@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadUserBudgetAndIncome() {
         if (userId != null) {
-            databaseRef.child("Users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseRef.child("Users").child(userId).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
@@ -262,6 +262,17 @@ public class MainActivity extends AppCompatActivity {
                         userIncome = snapshot.child("monthlyIncome").getValue(String.class);
 
                         Log.d(TAG, "Loaded user budget: " + userBudget + ", income: " + userIncome);
+
+                        // Get first name to display greeting
+                        String firstName = snapshot.child("firstName").getValue(String.class);
+                        if (firstName != null && !firstName.isEmpty()) {
+                            // Update greeting text view
+                            TextView greetingTextView = findViewById(R.id.greeting_text);
+                            if (greetingTextView != null) {
+                                greetingTextView.setText("Hi, " + firstName);
+                                greetingTextView.setVisibility(View.VISIBLE);
+                            }
+                        }
 
                         // Now load expenses once we have the budget and income
                         loadExpensesAndUpdateBudget();

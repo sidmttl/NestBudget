@@ -106,6 +106,20 @@
                         android:layout_marginStart="8dp"/>
                 </LinearLayout>
 
+                <TextView
+                    android:id="@+id/greeting_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hi there!"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="visible"/>
+
                 <!-- Accounts Overview Card -->
                 <androidx.cardview.widget.CardView
                     android:id="@+id/accounts_overview_card"
