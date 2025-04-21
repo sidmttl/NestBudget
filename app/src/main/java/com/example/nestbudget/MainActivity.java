@@ -1241,6 +1241,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         bottomNavigationView.setSelectedItemId(R.id.menu_dashboard);
+    }
 
   
     private void loadProfilePicture(ImageView profileIcon) {
