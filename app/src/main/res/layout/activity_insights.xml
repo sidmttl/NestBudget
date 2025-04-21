@@ -25,13 +25,6 @@
             android:gravity="center_vertical"
             android:padding="8dp">
 
-            <ImageView
-                android:id="@+id/menu_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_menu" />
-
             <TextView
                 android:id="@+id/toolbar_title"
                 android:layout_width="0dp"
@@ -43,22 +36,22 @@
                 android:textStyle="bold"
                 android:gravity="center" />
 
-            <ImageView
-                android:id="@+id/profile_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="5dp"
-                android:src="@drawable/ic_profile" />
-
-            <ImageView
-                android:id="@+id/notification_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_notifications" />
         </LinearLayout>
 
     </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+        android:id="@+id/pieChartTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Expenses by Category"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <com.github.mikephil.charting.charts.PieChart
         android:id="@+id/pieChart"

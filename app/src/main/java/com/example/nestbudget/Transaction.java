@@ -9,6 +9,8 @@ public class Transaction {
     private String location;
     private String date;
 
+    private String user;
+
     public Transaction() {
         this.id = "";
         this.name = "";
@@ -16,16 +18,18 @@ public class Transaction {
         this.amount = "";
         this.location = "";
         this.date = "";
+        this.user = "";
     }
 
 
-    public Transaction(String id, String name, String category, String amount, String location, String date) {
+    public Transaction(String id, String name, String category, String amount, String location, String date, String user) {
         this.id = id;
         this.name = name;
         this.category = category;
         this.amount = amount;
         this.location = location;
         this.date = date;
+        this.user = user;
     }
 
     public String getTransactionId() {
@@ -52,6 +56,10 @@ public class Transaction {
         return date;
     }
 
+    public String getUser() {
+        return user;
+    }
+
     public void setTransactionId(String id) {
         this.id = id;
     }
@@ -74,6 +82,10 @@ public class Transaction {
 
     public void setTransactionDate(String date) {
         this.date = date;
+    }
+
+    public void setUser(String user) {
+        this.user =  user;
     }
 }
 

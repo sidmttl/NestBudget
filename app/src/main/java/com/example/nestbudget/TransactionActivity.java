@@ -6,12 +6,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,6 +39,8 @@ public class TransactionActivity extends AppCompatActivity {
     private String familyCode;
     private String userID;
 
+    private DrawerLayout drawerLayout;
+
     private DatabaseReference databaseRef;
 
     @Override
@@ -51,6 +56,9 @@ public class TransactionActivity extends AppCompatActivity {
 
         recyclerViewTransactions = findViewById(R.id.recyler_view);
         fabAddTransaction = findViewById(R.id.floatingActionButton2);
+        ImageView menuIcon = findViewById(R.id.menu_icon);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        menuIcon.setOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
@@ -89,16 +97,19 @@ public class TransactionActivity extends AppCompatActivity {
 
             if (itemId == R.id.menu_dashboard) {
                 Intent intent = new Intent(TransactionActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_transactions) {
                 return true;
             } else if (itemId == R.id.menu_insights) {
                 Intent intent = new Intent(TransactionActivity.this, InsightsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_journal) {
                 Intent intent = new Intent(TransactionActivity.this, ToBuyListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             }
@@ -130,13 +141,13 @@ public class TransactionActivity extends AppCompatActivity {
         builder.setPositiveButton("Add", (dialog, which) -> {
             String name = etTransactionName.getText().toString().trim();
             String amount = etTransactionAmount.getText().toString().trim();
-            String category = spinnerTransactionCategory.getSelectedItem().toString(); // Get selected category
+            String category = spinnerTransactionCategory.getSelectedItem().toString();
             String location = etTransactionLocation.getText().toString().trim();
             String date = etTransactionDate.getText().toString().trim();
 
             if (!name.isEmpty() && !amount.isEmpty() && !category.isEmpty() && !location.isEmpty() && !date.isEmpty()) {
                 String id = Long.toString(System.currentTimeMillis());
-                Transaction newTransaction = new Transaction(id, name, category, amount, location, date); // Pass amount as String
+                Transaction newTransaction = new Transaction(id, name, category, amount, location, date, userID);
                 databaseRef.child("Groups").child(familyCode).child("transactions").child(id).setValue(newTransaction);
             } else {
                 Toast.makeText(TransactionActivity.this, "All fields are required", Toast.LENGTH_SHORT).show();
@@ -146,8 +157,9 @@ public class TransactionActivity extends AppCompatActivity {
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
         builder.show();
-    }
 
+
+    }
 
 
     @Override
@@ -155,4 +167,6 @@ public class TransactionActivity extends AppCompatActivity {
         super.onResume();
         bottomNavigationView.setSelectedItemId(R.id.menu_transactions);
     }
+
+
 }

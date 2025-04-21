@@ -124,4 +124,10 @@ public class JoinFamilyActivity extends AppCompatActivity {
         finish(); // Closes this activity and returns to previous
         return true;
     }
+
+    @Override
+    public void onBackPressed() {
+        finish();
+        super.onBackPressed();
+    }
 }

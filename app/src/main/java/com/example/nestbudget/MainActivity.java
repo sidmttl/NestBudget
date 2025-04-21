@@ -29,6 +29,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.DataSnapshot;
@@ -36,6 +37,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout goalsContainer;
     private TextView addGoalButton;
 
+
     // Dynamic budget and expense tracking variables
     private String userBudget;
     private String userIncome;
@@ -84,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView incomeTotalTextView;
     private ProgressBar savingsProgressBar;
     private TextView savingsWarningText;
+    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize Firebase
         databaseRef = FirebaseDatabase.getInstance().getReference();
+        storageRef = FirebaseStorage.getInstance().getReference("profile_pics");
 
         // Initialize UI Components
         initializeUI();
@@ -180,6 +186,8 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        loadProfilePicture(profileIcon);
+
         // Add goal button click
         addGoalButton.setOnClickListener(v -> {
             showAddGoalDialog();
@@ -220,14 +228,17 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.menu_transactions) {
                 Intent intent = new Intent(MainActivity.this, TransactionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
                 Intent intent = new Intent(MainActivity.this, InsightsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_journal) {
                 Intent intent = new Intent(MainActivity.this, ToBuyListActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             }
@@ -1225,9 +1236,27 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();
         bottomNavigationView.setSelectedItemId(R.id.menu_dashboard);
+
+  
+    private void loadProfilePicture(ImageView profileIcon) {
+        if (userId != null) {
+            StorageReference imageRef = storageRef.child(userId + ".jpg");
+
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                // Profile picture exists, load it using Glide
+                Glide.with(this)
+                        .load(uri)
+                        .circleCrop() // Make the image circular
+                        .into(profileIcon);
+            }).addOnFailureListener(e -> {
+                // Profile picture doesn't exist or error occurred, keep the default icon
+                // No action needed as the default icon is already set in the layout
+            });
+        }
     }
 }

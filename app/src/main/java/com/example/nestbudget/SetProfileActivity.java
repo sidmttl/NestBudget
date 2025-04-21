@@ -14,8 +14,15 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.appcompat.widget.Toolbar;
+
+import androidx.appcompat.view.ActionMode;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.database.*;
@@ -28,8 +35,10 @@ public class SetProfileActivity extends AppCompatActivity {
     private Button uploadButton, confirmButton, cancelButton;
     private Uri selectedImageUri;
 
+
     private EditText firstNameEditText, lastNameEditText, ageEditText, familyGroupIdEditText;
     private ImageView firstNameEditIcon, lastNameEditIcon, ageEditIcon;
+    private String userID;
 
     private final StorageReference storageRef = FirebaseStorage.getInstance().getReference("profile_pics");
     private DatabaseReference database;
@@ -80,7 +89,14 @@ public class SetProfileActivity extends AppCompatActivity {
             fetchFamilyCode(userId);
         }
 
+        LoginManager loginManager = new LoginManager(this);
+        userID = loginManager.getLoggedInUser();
+
+        // Load existing profile picture if available
+        loadExistingProfilePicture();
+
         uploadButton.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
+
 
         firstNameEditIcon.setOnClickListener(v -> enableEditing(firstNameEditText));
         lastNameEditIcon.setOnClickListener(v -> enableEditing(lastNameEditText));
@@ -212,13 +228,28 @@ public class SetProfileActivity extends AppCompatActivity {
         }
     }
 
+    private void loadExistingProfilePicture() {
+        StorageReference imageRef = storageRef.child(userID + ".jpg");
+
+        imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+            // Profile picture exists, load it using Glide
+            Glide.with(this)
+                    .load(uri)
+                    .circleCrop() // Make the image circular
+                    .into(profileImageView);
+        }).addOnFailureListener(e -> {
+            // Profile picture doesn't exist or error occurred, keep the default icon
+            // No action needed as the default icon is already set in the layout
+        });
+    }
+
     private void uploadImageToFirebase(Uri imageUri) {
-        String fileName = "user_profile_" + System.currentTimeMillis() + ".jpg";
+        String fileName = userID + ".jpg";
         StorageReference imageRef = storageRef.child(fileName);
 
         imageRef.putFile(imageUri)
                 .addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    Glide.with(this).load(uri).into(profileImageView);
+                    Glide.with(this).load(uri).circleCrop().into(profileImageView);
                     Toast.makeText(this, "Upload successful!", Toast.LENGTH_SHORT).show();
                 }))
                 .addOnFailureListener(e -> Toast.makeText(this, "Upload failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
@@ -226,7 +257,13 @@ public class SetProfileActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        finish();
+        finish(); // Closes this activity and returns to previous
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 }

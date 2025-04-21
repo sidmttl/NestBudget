@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -35,6 +40,7 @@ public class ToBuyListActivity extends AppCompatActivity {
     private String userID;
 
     private DatabaseReference databaseRef;
+    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +52,7 @@ public class ToBuyListActivity extends AppCompatActivity {
         userID = loginManager.getLoggedInUser();
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
+        storageRef = FirebaseStorage.getInstance().getReference("profile_pics");
 
         recyclerViewItems = findViewById(R.id.recyclerViewItems);
         fabAddItem = findViewById(R.id.fabAddItem);
@@ -81,6 +88,16 @@ public class ToBuyListActivity extends AppCompatActivity {
         });
 
         fabAddItem.setOnClickListener(v -> showAddItemDialog());
+
+        ImageView profileIcon = findViewById(R.id.profile_icon);
+        if (profileIcon != null) {
+            loadProfilePicture(profileIcon);
+
+            profileIcon.setOnClickListener(v -> {
+                Intent intent = new Intent(ToBuyListActivity.this, SetProfileActivity.class);
+                startActivity(intent);
+            });
+        }
     }
 
     private void setupBottomNavigation() {
@@ -90,15 +107,18 @@ public class ToBuyListActivity extends AppCompatActivity {
             if (itemId == R.id.menu_dashboard) {
                 // Navigate to Dashboard/MainActivity
                 Intent intent = new Intent(ToBuyListActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_transactions) {
                 Intent intent = new Intent(ToBuyListActivity.this, TransactionActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_insights) {
-                // For now, just show a toast
-                Toast.makeText(this, "Insights feature coming soon", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(ToBuyListActivity.this, InsightsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
                 return true;
             } else if (itemId == R.id.menu_journal) {
                 // Already on journal, no action needed
@@ -144,5 +164,22 @@ public class ToBuyListActivity extends AppCompatActivity {
         super.onResume();
         // Make sure Journal is selected when returning to this activity
         bottomNavigationView.setSelectedItemId(R.id.menu_journal);
+    }
+
+    private void loadProfilePicture(ImageView profileIcon) {
+        if (userID != null) {
+            StorageReference imageRef = storageRef.child(userID + ".jpg");
+
+            imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                // Profile picture exists, load it using Glide
+                Glide.with(this)
+                        .load(uri)
+                        .circleCrop() // Make the image circular
+                        .into(profileIcon);
+            }).addOnFailureListener(e -> {
+                // Profile picture doesn't exist or error occurred, keep the default icon
+                // No action needed as the default icon is already set in the layout
+            });
+        }
     }
 }

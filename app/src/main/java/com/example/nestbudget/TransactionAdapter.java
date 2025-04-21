@@ -39,6 +39,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         TextView transactionDate;
         TextView transactionCategory;
         TextView transactionLocation;
+
+        TextView transactionUser;
         ImageButton deleteButton;
 
         public TransactionViewHolder(View itemView) {
@@ -48,6 +50,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             transactionDate = itemView.findViewById(R.id.transaction_date);
             transactionCategory = itemView.findViewById(R.id.transaction_category);
             transactionLocation = itemView.findViewById(R.id.transaction_location);
+            transactionUser = itemView.findViewById(R.id.transaction_user);
             deleteButton = itemView.findViewById(R.id.buttonDelete);
         }
     }
@@ -74,6 +77,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         holder.transactionDate.setText(transaction.getTransactionDate());
         holder.transactionCategory.setText("Category: " + transaction.getTransactionCategory());
         holder.transactionLocation.setText("Location: " + transaction.getTransactionLocation());
+        holder.transactionUser.setText("Entered By: " + transaction.getUser());
 
         holder.deleteButton.setOnClickListener(v -> {
             int currentPosition = holder.getAdapterPosition();
@@ -150,7 +154,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                                 newCategory,
                                 newAmount,
                                 newLocation,
-                                newDate
+                                newDate,
+                                currentTransaction.getUser()
                         );
 
                         databaseRef.child("Groups").child(familyCode).child("transactions")
