@@ -13,35 +13,220 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:title="My Profile"
         app:titleTextColor="@android:color/white"
         app:navigationIcon="?attr/homeAsUpIndicator"
+        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Profile Picture -->
+    <ImageView
+        android:id="@+id/profileImageView"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_profile"
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toBottomOf="@id/family_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Upload Button -->
+    <Button
+        android:id="@+id/uploadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:textSize="14sp"
+        android:text="Upload"
+        app:layout_constraintTop_toBottomOf="@id/profileImageView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"/>
+
+    <!-- First Name -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="24dp">
+        android:id="@+id/firstNameLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/uploadButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="First Name"
+            android:textSize="14sp"
+            android:layout_marginLeft="5dp"/>
 
         <ImageView
-            android:id="@+id/profileImageView"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:src="@drawable/ic_profile"
-            android:scaleType="centerCrop"
-            android:padding="8dp" />
-
-        <Button
-            android:id="@+id/uploadButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Upload Profile Picture"
-            android:layout_marginTop="24dp"/>
+            android:id="@+id/editFirstNameIcon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_edit"
+            android:contentDescription="Edit First Name"
+            android:layout_marginEnd="5dp"/>
     </LinearLayout>
 
+    <EditText
+        android:id="@+id/firstNameEditText"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="4dp"
+        android:hint="First Name"
+        android:textSize="14sp"
+        android:enabled="false"
+        app:layout_constraintTop_toBottomOf="@id/firstNameLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="5dp" />
+
+    <!-- Last Name -->
+    <LinearLayout
+        android:id="@+id/lastNameLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/firstNameEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Last Name"
+            android:textSize="14sp"
+            android:layout_marginLeft="5dp"/>
+
+        <ImageView
+            android:id="@+id/editLastNameIcon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_edit"
+            android:contentDescription="Edit Last Name"
+            android:layout_marginEnd="5dp"/>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/lastNameEditText"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="4dp"
+        android:hint="Last Name"
+        android:textSize="14sp"
+        android:enabled="false"
+        app:layout_constraintTop_toBottomOf="@id/lastNameLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="5dp"/>
+
+    <!-- Age -->
+    <LinearLayout
+        android:id="@+id/ageLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toBottomOf="@id/lastNameEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Age"
+            android:textSize="14sp"
+            android:layout_marginLeft="5dp"/>
+
+        <ImageView
+            android:id="@+id/editAgeIcon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_edit"
+            android:contentDescription="Edit Age"
+            android:layout_marginEnd="5dp"/>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/ageEditText"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="4dp"
+        android:hint="Age"
+        android:textSize="14sp"
+        android:inputType="number"
+        android:enabled="false"
+        app:layout_constraintTop_toBottomOf="@id/ageLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="5dp"/>
+
+    <!-- Family Group ID (Read Only) -->
+    <TextView
+        android:id="@+id/familyLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Family Group ID"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/ageEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="5dp"/>
+
+    <EditText
+        android:id="@+id/familyGroupIdEditText"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_marginTop="4dp"
+        android:hint="Group ID"
+        android:textSize="14sp"
+        android:enabled="false"
+        android:focusable="false"
+        android:clickable="false"
+        app:layout_constraintTop_toBottomOf="@id/familyLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginLeft="5dp"/>
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/familyGroupIdEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/confirmButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="42dp"
+            android:text="Confirm"
+            android:textSize="14sp"
+            android:layout_marginLeft="15dp"/>
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="42dp"
+            android:layout_marginStart="8dp"
+            android:text="Cancel"
+            android:textSize="14sp"
+            android:layout_marginEnd="15dp"/>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

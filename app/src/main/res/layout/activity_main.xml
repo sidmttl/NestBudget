@@ -285,51 +285,103 @@
                             android:progressTint="@color/red"
                             android:progressBackgroundTint="@color/green"/>
 
+                        <TextView
+                            android:id="@+id/budget_warning_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Nearing budget limit!"
+                            android:textColor="@android:color/holo_red_dark"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:layout_marginTop="4dp"
+                            android:visibility="gone" />
+
                         <LinearLayout
                             android:id="@+id/categories_container"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:layout_marginTop="8dp">
-
                             <!-- Category items will be added here programmatically -->
-
-                            <!-- Sample Category Item -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:layout_marginTop="8dp">
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="1"
-                                        android:text="Savings"
-                                        android:textSize="14sp"/>
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="$300 / $400"
-                                        android:textSize="14sp"/>
-                                </LinearLayout>
-
-                                <ProgressBar
-                                    style="@android:style/Widget.ProgressBar.Horizontal"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="8dp"
-                                    android:layout_marginTop="4dp"
-                                    android:max="400"
-                                    android:progress="300"
-                                    android:progressTint="@color/blue"/>
-                            </LinearLayout>
                         </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Monthly Savings Card -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Monthly Savings"
+                            android:textSize="18sp"
+                            android:textStyle="bold"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="16dp">
+
+                            <TextView
+                                android:id="@+id/savings_amount_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="$0 Saved"
+                                android:textSize="14sp"
+                                android:textColor="@android:color/holo_green_dark"/>
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"/>
+
+                            <TextView
+                                android:id="@+id/income_total"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="of $0"
+                                android:textSize="14sp"/>
+                        </LinearLayout>
+
+                        <ProgressBar
+                            android:id="@+id/savingsBar"
+                            style="@android:style/Widget.ProgressBar.Horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressDrawable="@android:drawable/progress_horizontal"
+                            android:progressTint="@android:color/holo_orange_light"
+                            android:progressBackgroundTint="@color/green"/>
+
+                        <TextView
+                            android:id="@+id/savings_warning_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Reaching savings goal!"
+                            android:textColor="@android:color/holo_green_dark"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:gravity="center"
+                            android:layout_marginTop="4dp"
+                            android:visibility="gone" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
@@ -378,82 +430,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:layout_marginTop="8dp">
-
-                            <!-- Sample Bill Item 1 -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:padding="8dp">
-
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:text="Rent"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="$1,200"
-                                    android:textSize="16sp"
-                                    android:layout_marginStart="8dp"
-                                    android:layout_marginEnd="8dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Due: Apr 30"
-                                    android:textSize="14sp"
-                                    android:textColor="@android:color/holo_orange_dark"/>
-                            </LinearLayout>
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@android:color/darker_gray"
-                                android:alpha="0.5"/>
-
-                            <!-- Sample Bill Item 2 -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:padding="8dp">
-
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:text="Electricity"
-                                    android:textSize="16sp"
-                                    android:textStyle="bold"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="$85"
-                                    android:textSize="16sp"
-                                    android:layout_marginStart="8dp"
-                                    android:layout_marginEnd="8dp"/>
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Due: Apr 22"
-                                    android:textSize="14sp"
-                                    android:textColor="@android:color/holo_red_light"/>
-                            </LinearLayout>
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@android:color/darker_gray"
-                                android:alpha="0.5"/>
-
-                            <!-- More bills will be added here programmatically -->
+                            <!-- Bills will be added here programmatically -->
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -503,83 +480,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
                             android:layout_marginTop="8dp">
-
-                            <!-- Sample Goal Item 1 -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="8dp">
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="1"
-                                        android:text="Vacation Fund"
-                                        android:textSize="16sp"
-                                        android:textStyle="bold"/>
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="$1,500 / $3,000"
-                                        android:textSize="14sp"/>
-                                </LinearLayout>
-
-                                <ProgressBar
-                                    style="@android:style/Widget.ProgressBar.Horizontal"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="12dp"
-                                    android:layout_marginTop="8dp"
-                                    android:max="3000"
-                                    android:progress="1500"
-                                    android:progressTint="@color/blue"/>
-                            </LinearLayout>
-
-                            <!-- Sample Goal Item 2 -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:padding="8dp"
-                                android:layout_marginTop="8dp">
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="1"
-                                        android:text="Emergency Fund"
-                                        android:textSize="16sp"
-                                        android:textStyle="bold"/>
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="$4,500 / $6,000"
-                                        android:textSize="14sp"/>
-                                </LinearLayout>
-
-                                <ProgressBar
-                                    style="@android:style/Widget.ProgressBar.Horizontal"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="12dp"
-                                    android:layout_marginTop="8dp"
-                                    android:max="6000"
-                                    android:progress="4500"
-                                    android:progressTint="@color/green"/>
-                            </LinearLayout>
-
-                            <!-- More goals will be added here programmatically -->
+                            <!-- Goals will be added here programmatically -->
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>

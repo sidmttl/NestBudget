@@ -34,6 +34,15 @@
             android:name=".SignupActivity"
             android:exported="false" />
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FamilyGroupActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FamilySetupActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>

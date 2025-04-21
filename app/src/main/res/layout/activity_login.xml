@@ -4,8 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/login_background"
     tools:context=".LoginActivity">
 
+    <!-- The rest of your login screen layout -->
     <TextView
         android:id="@+id/activityLabel"
         android:layout_width="wrap_content"
@@ -13,12 +15,12 @@
         android:text="Welcome to NestBudget!"
         android:textSize="30dp"
         android:textStyle="bold"
+        android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.2" />
-
 
     <TextView
         android:id="@+id/activityInstruction"
@@ -27,9 +29,11 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="30dp"
         android:text="Password is not verified. But it is a required field. You can enter anything in it for the demo."
+        android:textColor="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/activityLabel" />
 
+    <!-- Update EditText styles for better visibility on the blue background -->
     <EditText
         android:id="@+id/editTextUsername"
         android:layout_width="match_parent"
@@ -42,7 +46,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/activityInstruction" />
-
 
     <EditText
         android:id="@+id/editTextPassword"
@@ -74,7 +77,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="New User? Create Account"
-        android:textColor="@android:color/holo_blue_dark"
+        android:textColor="@android:color/white"
         android:textSize="14sp"
         android:clickable="true"
         android:focusable="true"

@@ -1,14 +1,12 @@
 package com.example.nestbudget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.widget.*;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.firebase.database.*;
@@ -18,83 +16,107 @@ public class JoinFamilyActivity extends AppCompatActivity {
 
     private static final String PREFS_NAME = "UserPrefs";
     private static final String KEY_USERNAME = "username";
-    private static final String KEY_FAMILYCODE  = "familyCode";
+    private static final String KEY_FAMILYCODE = "familyCode";
 
     private SharedPreferences sharedPreferences;
 
-    private TextView tvOwnCode;
+    private TextView tvInstructions;
     private EditText etGroupCode;
     private Button btnJoin;
 
     private DatabaseReference database;
-    private String userId;
-    private String ownCode;
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_join_family);
 
         Toolbar toolbar = findViewById(R.id.family_toolbar);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
-        tvOwnCode = findViewById(R.id.tv_own_code);
+        // Get username from intent first (during registration flow)
+        username = getIntent().getStringExtra("username");
+
+        // If not in intent, try SharedPreferences (normal usage)
+        if (username == null) {
+            sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            username = sharedPreferences.getString(KEY_USERNAME, null);
+        }
+
+        // Initialize UI elements
+        tvInstructions = findViewById(R.id.tv_instructions);
         etGroupCode = findViewById(R.id.et_group_code);
         btnJoin = findViewById(R.id.btn_join);
 
-        sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        // Set instructions
+        tvInstructions.setText("Enter the family code shared with you to join an existing family group.");
+
+        // Initialize Firebase
         database = FirebaseDatabase.getInstance().getReference();
 
-        userId = sharedPreferences.getString(KEY_USERNAME, null);
-
-        // Load or generate user's own code
-        loadOrCreateUserCode();
-
+        // Set click listener for Join button
         btnJoin.setOnClickListener(v -> {
             String enteredCode = etGroupCode.getText().toString().trim();
             if (!enteredCode.isEmpty()) {
-                joinGroup(enteredCode);
+                verifyAndJoinGroup(enteredCode);
             } else {
                 Toast.makeText(this, "Please enter a group code.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void loadOrCreateUserCode() {
-        database.child("Users").child(userId).child("familyCode").addListenerForSingleValueEvent(new ValueEventListener() {
+    private void verifyAndJoinGroup(String groupCode) {
+        // First check if group code exists
+        database.child("Groups").child(groupCode).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    ownCode = snapshot.getValue(String.class);
+                    // Group exists, join it
+                    joinGroup(groupCode);
                 } else {
-                    ownCode = generateRandomCode();
-                    database.child("Users").child(userId).child("familyCode").setValue(ownCode);
-                    database.child("Groups").child(ownCode).child("members").child(userId).setValue(true);
+                    // Group doesn't exist
+                    etGroupCode.setError("Incorrect Family Code");
+                    Toast.makeText(JoinFamilyActivity.this,
+                            "This family code doesn't exist", Toast.LENGTH_SHORT).show();
                 }
-                tvOwnCode.setText("Your Code: " + ownCode);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(JoinFamilyActivity.this, "Failed to load code", Toast.LENGTH_SHORT).show();
+                Toast.makeText(JoinFamilyActivity.this,
+                        "Failed to verify code: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void joinGroup(String groupCode) {
+        // Skip if username is null
+        if (username == null || username.isEmpty()) {
+            Toast.makeText(this, "Error: Username not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         // Add user to group members list
-        database.child("Groups").child(groupCode).child("members").child(userId).setValue(true);
+        database.child("Groups").child(groupCode).child("members").child(username).setValue(true);
 
         // Save joined group in user's data
-        database.child("Users").child(userId).child("familyCode").setValue(groupCode);
+        database.child("Users").child(username).child("familyCode").setValue(groupCode);
+
+        // Also save to SharedPreferences
+        sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         sharedPreferences.edit().putString(KEY_FAMILYCODE, groupCode).apply();
 
         Toast.makeText(this, "Joined group: " + groupCode, Toast.LENGTH_SHORT).show();
-    }
 
-    private String generateRandomCode() {
-        return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+        // Navigate to MainActivity or FamilySetupActivity
+        Intent intent = new Intent(JoinFamilyActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 
     @Override

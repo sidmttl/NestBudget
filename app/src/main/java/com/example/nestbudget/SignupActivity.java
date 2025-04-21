@@ -1,7 +1,10 @@
 package com.example.nestbudget;
 
+import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -24,6 +27,7 @@ public class SignupActivity extends AppCompatActivity {
     private Button btnSignup;
 
     private DatabaseReference databaseReference;
+    private String savedUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +50,6 @@ public class SignupActivity extends AppCompatActivity {
         btnSignup = findViewById(R.id.btnSignup);
 
         btnSignup.setOnClickListener(view -> registerUser());
-
     }
 
     private void registerUser() {
@@ -61,41 +64,28 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
         if (TextUtils.isEmpty(firstName)) {
-            etFirstName.setError("Email is required");
+            etFirstName.setError("First Name is required");
             return;
         }
-
         if (TextUtils.isEmpty(age)) {
-            etFirstName.setError("Age is required");
+            etAge.setError("Age is required");
             return;
         }
-
         if (TextUtils.isEmpty(password) || password.length() < 6) {
             etPassword.setError("Password must be at least 6 characters");
             return;
         }
 
-        HashMap<String, String> userMap = new HashMap<>();
-        userMap.put("firstName", firstName);
-        userMap.put("lastName", lastName);
-        userMap.put("password", password);
-        userMap.put("age", age);
-
-        assert username != null;
-
         databaseReference.child("Users").child(username).get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult().exists()) {
-                // Username already exists
                 Toast.makeText(SignupActivity.this, "Username already taken. Choose another one.", Toast.LENGTH_SHORT).show();
             } else {
-                // Username is available, proceed with signup
                 saveUserToDatabase(username, firstName, lastName, password, age);
             }
         });
     }
 
     private void saveUserToDatabase(String username, String firstName, String lastName, String password, String age) {
-
         String ownCode = generateRandomCode();
 
         HashMap<String, String> userMap = new HashMap<>();
@@ -105,21 +95,64 @@ public class SignupActivity extends AppCompatActivity {
         userMap.put("age", age);
         userMap.put("familyCode", ownCode);
 
+        savedUsername = username;
 
         databaseReference.child("Users").child(username).setValue(userMap).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-               Toast.makeText(SignupActivity.this, "Signup successful!", Toast.LENGTH_SHORT).show();
-               finish();
+                // Proceed to income/budget pop-up
+                // showIncomeBudgetDialog(username);
+                Intent intent = new Intent(SignupActivity.this, FamilyGroupActivity.class);
+                intent.putExtra("username", username);
+                startActivity(intent);
             } else {
                 Toast.makeText(SignupActivity.this, "Failed to save data!", Toast.LENGTH_SHORT).show();
             }
         });
 
         databaseReference.child("Groups").child(ownCode).child("members").child(username).setValue(true);
-
     }
 
     private String generateRandomCode() {
         return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+    }
+
+    private void showIncomeBudgetDialog(String username) {
+        Dialog dialog = new Dialog(SignupActivity.this);
+        dialog.setContentView(R.layout.dialog_income_budget);
+        dialog.setCancelable(false);
+
+        EditText etIncome = dialog.findViewById(R.id.etIncome);
+        EditText etBudget = dialog.findViewById(R.id.etBudget);
+        Button btnSave = dialog.findViewById(R.id.btnSave);
+        Button btnCancel = dialog.findViewById(R.id.btnCancel);
+
+        btnSave.setOnClickListener(v -> {
+            String income = etIncome.getText().toString().trim();
+            String budget = etBudget.getText().toString().trim();
+
+            if (TextUtils.isEmpty(income) || TextUtils.isEmpty(budget)) {
+                Toast.makeText(SignupActivity.this, "Both fields are required", Toast.LENGTH_SHORT).show();
+            } else {
+                databaseReference.child("Users").child(username).child("monthlyIncome").setValue(income);
+                databaseReference.child("Users").child(username).child("monthlyBudget").setValue(budget);
+                dialog.dismiss();
+                Toast.makeText(SignupActivity.this, "Signup successful!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(SignupActivity.this, MainActivity.class));
+                finish(); // Finish SignupActivity so the user cannot go back to it
+            }
+        });
+
+        btnCancel.setOnClickListener(v -> {
+            String income = etIncome.getText().toString().trim();
+            String budget = etBudget.getText().toString().trim();
+
+            if (TextUtils.isEmpty(income) || TextUtils.isEmpty(budget)) {
+                Toast.makeText(SignupActivity.this, "Both fields are required", Toast.LENGTH_SHORT).show();
+            } else {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
     }
 }
