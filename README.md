@@ -2,7 +2,7 @@
 
 NestBudget is an Android application designed to help families collaborate on managing their finances together. The app provides a comprehensive suite of tools for tracking accounts, bills, financial goals, transactions, and shared expenses.
 
-![NestBudget Logo](app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
+![NestBudget Logo](app/src/main/res/mipmap-hdpi/ic_launcher.webp) 
 
 ## Features
 
